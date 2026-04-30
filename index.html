@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arnab Nandi — Neuroscientist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0e12; --surface: #12161c; --border: #1f2530;
+      --text: #e8e2d9; --muted: #6b7280; --accent: #c9a96e;
+      --accent2: #5b8fa8; --glow: rgba(201,169,110,0.12);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; font-weight: 300; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px; pointer-events: none; z-index: 999; opacity: 0.4; }
+
+    .cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width 0.3s, height 0.3s; mix-blend-mode: screen; }
+    .cursor-ring { width: 36px; height: 36px; border: 1px solid rgba(201,169,110,0.4); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width 0.3s, height 0.3s; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 3rem; z-index: 100; backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color 0.3s, background 0.3s; }
+    nav.scrolled { background: rgba(11,14,18,0.9); border-color: var(--border); }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 0.05em; color: var(--accent); }
+    .nav-links { display: flex; gap: 2.5rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    #hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; padding: 8rem 3rem 4rem; }
+    #hero::after { content: ''; position: absolute; width: 700px; height: 700px; background: radial-gradient(circle, rgba(201,169,110,0.05) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+    .hero-inner { max-width: 960px; width: 100%; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 4rem; align-items: center; }
+    .hero-tag { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+    h1 em { font-style: italic; color: var(--accent); }
+    .hero-role { margin-top: 1rem; font-size: 0.72rem; color: var(--accent2); letter-spacing: 0.08em; opacity: 0; animation: fadeUp 0.8s 0.5s forwards; }
+    .hero-inst { font-size: 0.65rem; color: var(--muted); margin-top: 0.3rem; opacity: 0; animation: fadeUp 0.8s 0.55s forwards; }
+    .hero-desc { margin-top: 1.5rem; color: var(--muted); font-size: 0.78rem; line-height: 1.85; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; }
+    .hero-actions { display: flex; gap: 1rem; margin-top: 2rem; opacity: 0; animation: fadeUp 0.8s 0.8s forwards; flex-wrap: wrap; }
+    .btn { padding: 0.65rem 1.6rem; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border-radius: 2px; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: var(--accent); color: var(--bg); border: 1px solid var(--accent); }
+    .btn-primary:hover { background: transparent; color: var(--accent); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-image-wrap { opacity: 0; animation: fadeLeft 0.9s 0.5s forwards; }
+    .hero-image-frame { position: relative; width: 100%; aspect-ratio: 3/4; max-width: 300px; margin-left: auto; }
+    .hero-image-frame::before { content: ''; position: absolute; inset: -12px; border: 1px solid var(--accent); opacity: 0.3; border-radius: 2px; }
+    .hero-image-frame::after { content: ''; position: absolute; inset: -24px; border: 1px solid var(--border); border-radius: 2px; }
+    .hero-placeholder { width: 100%; height: 100%; background: var(--surface); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 5rem; color: var(--accent); opacity: 0.4; }
+
+    /* SECTIONS */
+    section { padding: 6rem 3rem; }
+    .section-wrap { max-width: 960px; margin: 0 auto; }
+    .section-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 3rem; display: flex; align-items: center; gap: 1rem; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ABOUT */
+    #about { background: var(--surface); }
+    .about-grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 4rem; align-items: start; }
+    .about-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 300; line-height: 1.2; margin-bottom: 1.5rem; }
+    .about-text p { color: var(--muted); font-size: 0.77rem; line-height: 1.9; margin-bottom: 0.9rem; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat { padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; transition: border-color 0.3s, background 0.3s; }
+    .stat:hover { border-color: var(--accent); background: var(--glow); }
+    .stat-number { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
+
+    /* POSITIONS — timeline style */
+    .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 139px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+    .tl-item { display: grid; grid-template-columns: 140px 1fr; gap: 2rem; align-items: start; padding: 2rem 0; border-bottom: 1px solid var(--border); position: relative; transition: background 0.3s; }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-item:hover .tl-dot { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+    .tl-year { font-size: 0.62rem; color: var(--accent); letter-spacing: 0.08em; padding-top: 0.3rem; text-align: right; padding-right: 1.5rem; }
+    .tl-dot { position: absolute; left: 133px; top: 2.3rem; width: 13px; height: 13px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); transition: background 0.3s, box-shadow 0.3s; z-index: 1; }
+    .tl-content { padding-left: 1rem; }
+    .tl-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; line-height: 1.2; margin-bottom: 0.3rem; }
+    .tl-subtitle { font-size: 0.7rem; color: var(--accent2); margin-bottom: 0.5rem; letter-spacing: 0.04em; }
+    .tl-org { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.8rem; }
+    .tl-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.8; }
+    .tl-link { display: inline-block; margin-top: 0.6rem; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(201,169,110,0.3); padding-bottom: 1px; transition: border-color 0.3s; }
+    .tl-link:hover { border-color: var(--accent); }
+    .tl-badge { display: inline-block; padding: 0.2rem 0.7rem; border: 1px solid rgba(201,169,110,0.4); border-radius: 2px; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
+
+    /* PUBLICATIONS */
+    #publications { background: var(--surface); }
+    .pub-list { display: flex; flex-direction: column; gap: 1.2rem; }
+    .pub-item { border: 1px solid var(--border); border-radius: 2px; padding: 1.6rem 2rem; display: grid; grid-template-columns: 50px 1fr; gap: 1.5rem; transition: border-color 0.3s, background 0.3s; }
+    .pub-item:hover { border-color: var(--accent); background: rgba(201,169,110,0.03); }
+    .pub-num { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--accent); opacity: 0.5; line-height: 1; }
+    .pub-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; line-height: 1.4; margin-bottom: 0.5rem; }
+    .pub-authors { font-size: 0.67rem; color: var(--muted); line-height: 1.6; margin-bottom: 0.4rem; }
+    .pub-journal { font-size: 0.65rem; color: var(--accent2); }
+    .pub-badge { display: inline-block; padding: 0.18rem 0.6rem; border: 1px solid var(--border); border-radius: 2px; font-size: 0.57rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-left: 0.5rem; }
+    .pub-badge.prep { border-color: rgba(201,169,110,0.3); color: var(--accent); }
+    .pub-badge.published { border-color: rgba(91,143,168,0.4); color: var(--accent2); }
+
+    /* SKILLS */
+    .skill-group { margin-bottom: 2rem; }
+    .skill-group-name { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag { padding: 0.35rem 0.9rem; border: 1px solid var(--border); border-radius: 2px; font-size: 0.68rem; color: var(--text); transition: all 0.25s; cursor: default; }
+    .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: var(--glow); }
+    .skill-tag.highlight { border-color: rgba(201,169,110,0.4); color: var(--accent); }
+
+    /* TEACHING */
+    #teaching { background: var(--surface); }
+    .teach-list { display: flex; flex-direction: column; gap: 1rem; }
+    .teach-item { border: 1px solid var(--border); padding: 1.4rem 2rem; border-radius: 2px; display: grid; grid-template-columns: 140px 1fr; gap: 1.5rem; transition: border-color 0.3s; }
+    .teach-item:hover { border-color: var(--accent); }
+    .teach-year { font-size: 0.62rem; color: var(--accent); letter-spacing: 0.08em; padding-top: 0.2rem; }
+    .teach-role { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
+    .teach-org { font-size: 0.68rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* AWARDS */
+    .awards-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
+    .award-item { border: 1px solid var(--border); padding: 1.4rem 1.6rem; border-radius: 2px; transition: border-color 0.3s, background 0.3s; }
+    .award-item:hover { border-color: var(--accent); background: var(--glow); }
+    .award-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; margin-bottom: 0.3rem; }
+    .award-body { font-size: 0.65rem; color: var(--muted); line-height: 1.5; }
+
+    /* CONTACT */
+    #contact { text-align: center; }
+    #contact h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem,5vw,3.5rem); font-weight: 300; margin-bottom: 0.8rem; }
+    #contact p { color: var(--muted); font-size: 0.75rem; margin-bottom: 2rem; }
+    .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .contact-link { padding: 0.7rem 1.8rem; border: 1px solid var(--border); border-radius: 2px; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: all 0.3s; }
+    .contact-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    footer { padding: 1.8rem 3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    footer p { font-size: 0.62rem; color: var(--muted); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeLeft { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+    .reveal { opacity:0; transform:translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    @media(max-width:768px){
+      nav { padding:1.2rem 1.5rem; } .nav-links { display:none; }
+      section { padding:4rem 1.5rem; }
+      .hero-inner { grid-template-columns:1fr; gap:2rem; }
+      .hero-image-wrap { order:-1; } .hero-image-frame { max-width:200px; margin:0 auto; }
+      .about-grid { grid-template-columns:1fr; }
+      .awards-grid { grid-template-columns:1fr; }
+      .timeline::before { display:none; }
+      .tl-item { grid-template-columns:1fr; gap:0.4rem; }
+      .tl-year { text-align:left; padding-right:0; }
+      .tl-dot { display:none; }
+      .tl-content { padding-left:0; }
+      .teach-item { grid-template-columns:1fr; gap:0.4rem; }
+      .pub-item { grid-template-columns:1fr; gap:0.5rem; }
+      footer { flex-direction:column; gap:0.5rem; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav id="navbar">
+  <div class="nav-logo">AN</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#positions">Research</a>
+    <a href="#publications">Publications</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <p class="hero-tag">— Postdoctoral Researcher · Paris, France</p>
+      <h1>Arnab<br/><em>Nandi</em></h1>
+      <p class="hero-role">Postdoc · Bouvier Lab, Paris-Saclay Institute of Neuroscience</p>
+      <p class="hero-inst">CNRS / Université Paris-Saclay · NeuroPSI, Campus CEA Saclay</p>
+      <p class="hero-desc">
+        Investigating the role of the reticular formation in motor function
+        using viral strategies, optogenetics, fiber photometry, and
+        advanced behaviour tracking. Broadly interested in brainstem–spinal
+        cord circuits that underlie locomotion and adaptive motor control.
+      </p>
+      <div class="hero-actions">
+        <a href="#publications" class="btn btn-primary">Publications</a>
+        <a href="mailto:arnabnandi@iisc.ac.in" class="btn btn-ghost">Get in Touch</a>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <div class="hero-image-frame">
+        <div class="hero-placeholder">A</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-wrap">
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <div class="section-label">About</div>
+        <h2>Decoding circuits<br/>that make us move.</h2>
+        <p>
+          I'm a postdoctoral researcher in the <a href="https://www.bouvier-lab.com/" target="_blank" style="color:var(--accent);text-decoration:none;">Bouvier Lab</a> at the
+          Paris-Saclay Institute of Neuroscience (CNRS), where I study how
+          reticular formation circuits orchestrate motor function — combining
+          viral tracing, optogenetics, fiber photometry, and behavioural
+          tracking in mice.
+        </p>
+        <p>
+          My PhD at IISc Bangalore focused on how early-life stress shapes
+          hippocampal glial development and adult behaviour. I also build
+          open-source software tools (DBscorer, tracKit) that make
+          behavioural neuroscience analysis faster and more reproducible.
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-number">8+</div><div class="stat-label">Years Research</div></div>
+        <div class="stat"><div class="stat-number">5</div><div class="stat-label">Publications</div></div>
+        <div class="stat"><div class="stat-number">4</div><div class="stat-label">National Exams</div></div>
+        <div class="stat"><div class="stat-number">2</div><div class="stat-label">OSS Tools</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH POSITIONS -->
+<section id="positions">
+  <div class="section-wrap">
+    <div class="section-label reveal">Research Positions</div>
+    <div class="timeline">
+
+      <div class="tl-item reveal">
+        <div class="tl-year">2024 – Present</div>
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-badge">Current Position</div>
+          <div class="tl-title">Postdoctoral Researcher</div>
+          <div class="tl-subtitle">Reticular Formation & Motor Control</div>
+          <div class="tl-org">Bouvier Lab · Paris-Saclay Institute of Neuroscience (NeuroPSI) · CNRS / Université Paris-Saclay, France</div>
+          <div class="tl-desc">
+            Studying the role of the reticular formation in motor function using a multidisciplinary approach: viral-based circuit tracing, optogenetics, fiber photometry, and advanced behavioural tracking. Part of a team studying brainstem–spinal cord cooperation in locomotion and breathing.
+          </div>
+          <a href="https://www.bouvier-lab.com/" target="_blank" class="tl-link">bouvier-lab.com ↗</a>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-year">2017 – 2024</div>
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-title">PhD Researcher</div>
+          <div class="tl-subtitle">Early-Life Stress & Glial Development</div>
+          <div class="tl-org">Marathe Lab · Centre for Neuroscience, Indian Institute of Science, Bangalore, India</div>
+          <div class="tl-desc">
+            Investigated effects of early-life maternal deprivation on hippocampal astroglial morphology and adult behaviour. Developed open-source tools (DBscorer, tracKit) for automated rodent behavioural analysis, now used by labs worldwide.
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-year">2015 – 2017</div>
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-title">M.Sc. Research Project</div>
+          <div class="tl-subtitle">SNP Association in NSCL+P Cases</div>
+          <div class="tl-org">Department of Zoology · Banaras Hindu University, India</div>
+          <div class="tl-desc">
+            PCR-based study of SNP associations in non-syndromic cleft lip and palate cases in Uttar Pradesh. Skills: PCR, human DNA extraction from blood cells, agarose gel electrophoresis.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section id="publications">
+  <div class="section-wrap">
+    <div class="section-label reveal">Publications</div>
+    <div class="pub-list">
+      <div class="pub-item reveal">
+        <div class="pub-num">01</div>
+        <div>
+          <div class="pub-title">Hippocampal astroglial hypertrophy in mice subjected to early life maternal deprivation</div>
+          <div class="pub-authors">Nandi, A., Virmani, G., &amp; Marathe, S. (2023)</div>
+          <div class="pub-journal">Manuscript under preparation <span class="pub-badge prep">In Prep</span></div>
+        </div>
+      </div>
+      <div class="pub-item reveal">
+        <div class="pub-num">02</div>
+        <div>
+          <div class="pub-title">tracKit: an open-source video tracking software for analysis of rodent behavior</div>
+          <div class="pub-authors">Nandi, A., Virmani, G., &amp; Marathe, S. (2023)</div>
+          <div class="pub-journal">Manuscript under preparation <span class="pub-badge prep">In Prep</span></div>
+        </div>
+      </div>
+      <div class="pub-item reveal">
+        <div class="pub-num">03</div>
+        <div>
+          <div class="pub-title">SRF-deficient astrocytes provide neuroprotection in mouse models of excitotoxicity and neurodegeneration</div>
+          <div class="pub-authors">Thumu SCR., Jain M., Soman S., Das S., Verma V., Nandi A., et al. (2023)</div>
+          <div class="pub-journal">bioRxiv <span class="pub-badge">Preprint</span></div>
+        </div>
+      </div>
+      <div class="pub-item reveal">
+        <div class="pub-num">04</div>
+        <div>
+          <div class="pub-title">DBscorer: An open-source software for automated accurate analysis of rodent behavior in forced swim test and tail suspension test</div>
+          <div class="pub-authors">Nandi, A., Virmani, G., Barve, A., &amp; Marathe, S. (2021)</div>
+          <div class="pub-journal">eNeuro, 8(6) <span class="pub-badge published">Published</span></div>
+        </div>
+      </div>
+      <div class="pub-item reveal">
+        <div class="pub-num">05</div>
+        <div>
+          <div class="pub-title">Subfield-specific effects of chronic mild unpredictable stress on hippocampal astrocytes</div>
+          <div class="pub-authors">Virmani, G., D'almeida, P., Nandi, A., &amp; Marathe, S. (2021)</div>
+          <div class="pub-journal">European Journal of Neuroscience, 54(5) <span class="pub-badge published">Published</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-wrap">
+    <div class="section-label reveal">Skills</div>
+    <div class="reveal">
+      <div class="skill-group">
+        <div class="skill-group-name">Current — In Vivo Systems Neuroscience</div>
+        <div class="skill-tags">
+          <span class="skill-tag highlight">Optogenetics</span>
+          <span class="skill-tag highlight">Fiber Photometry</span>
+          <span class="skill-tag highlight">Viral Circuit Tracing</span>
+          <span class="skill-tag highlight">Behaviour Tracking</span>
+          <span class="skill-tag">In Vivo Electrophysiology</span>
+          <span class="skill-tag">Immunohistochemistry</span>
+          <span class="skill-tag">Confocal Imaging</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-name">Molecular & Cell Biology</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Mouse Colony Maintenance</span>
+          <span class="skill-tag">Genetic KO Animals</span>
+          <span class="skill-tag">Drug Administration (IP/SC/ICV)</span>
+          <span class="skill-tag">Cell Culture</span>
+          <span class="skill-tag">RNA Isolation</span>
+          <span class="skill-tag">qRT-PCR</span>
+          <span class="skill-tag">Basic Cloning</span>
+          <span class="skill-tag">Cryo-sectioning</span>
+          <span class="skill-tag">Histology</span>
+          <span class="skill-tag">PCR</span>
+          <span class="skill-tag">Gel Electrophoresis</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-name">Computational & Analysis</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">MATLAB</span>
+          <span class="skill-tag">ImageJ / Bio-image Analysis</span>
+          <span class="skill-tag">Open-Source Software Dev</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-name">Behavioural Neuroscience</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Locomotion Analysis</span>
+          <span class="skill-tag">Anxiety Tests</span>
+          <span class="skill-tag">Learning &amp; Memory</span>
+          <span class="skill-tag">Forced Swim Test</span>
+          <span class="skill-tag">Tail Suspension Test</span>
+          <span class="skill-tag">Video Tracking</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEACHING -->
+<section id="teaching">
+  <div class="section-wrap">
+    <div class="section-label reveal">Teaching</div>
+    <div class="teach-list">
+      <div class="teach-item reveal">
+        <div class="teach-year">2022 · 2023</div>
+        <div><div class="teach-role">Teaching Assistant — Computational Neuroscience</div><div class="teach-org">Neuromatch Academy</div></div>
+      </div>
+      <div class="teach-item reveal">
+        <div class="teach-year">2019 · 2021</div>
+        <div><div class="teach-role">Teaching Assistant — Neuroanatomy &amp; Staining Procedures</div><div class="teach-org">Indian Institute of Science, Bangalore (Undergraduate Course)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section id="awards">
+  <div class="section-wrap">
+    <div class="section-label reveal">Honors &amp; Awards</div>
+    <div class="awards-grid">
+      <div class="award-item reveal"><div class="award-name">CSIR-NET in Life Science</div><div class="award-body">Council of Scientific &amp; Industrial Research, India</div></div>
+      <div class="award-item reveal"><div class="award-name">UGC-NET in Life Science</div><div class="award-body">University Grants Commission, India</div></div>
+      <div class="award-item reveal"><div class="award-name">GATE in Life Science</div><div class="award-body">Graduate Aptitude Test in Engineering · IIT India</div></div>
+      <div class="award-item reveal"><div class="award-name">JGEEBILS</div><div class="award-body">Tata Institute of Fundamental Research · Dept. of Atomic Energy, India</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-wrap reveal">
+    <div class="section-label" style="justify-content:center;">Contact</div>
+    <h2>Let's connect &amp;<br/><em>collaborate.</em></h2>
+    <p>Open to research discussions, collaborations, and opportunities in systems &amp; circuit neuroscience.</p>
+    <div class="contact-links">
+      <a href="mailto:arnabnandi@iisc.ac.in" class="contact-link">Email</a>
+      <a href="https://www.bouvier-lab.com/" class="contact-link" target="_blank">Bouvier Lab</a>
+      <a href="https://github.com/arnabnandi" class="contact-link" target="_blank">GitHub</a>
+      <a href="https://linkedin.com/in/arnabnandi" class="contact-link" target="_blank">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Arnab Nandi</p>
+  <p>arnabnandi.github.io · NeuroPSI, CNRS · Paris-Saclay</p>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function loop(){rx+=(mx-rx)*0.15;ry+=(my-ry)*0.15;cursor.style.left=mx+'px';cursor.style.top=my+'px';ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+  document.querySelectorAll('a,button,.pub-item,.tl-item,.award-item,.skill-tag').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';ring.style.width='52px';ring.style.height='52px';});
+    el.addEventListener('mouseleave',()=>{cursor.style.width='8px';cursor.style.height='8px';ring.style.width='36px';ring.style.height='36px';});
+  });
+  const navbar=document.getElementById('navbar');
+  window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',window.scrollY>50));
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
