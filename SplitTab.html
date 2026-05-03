@@ -399,8 +399,11 @@ function removeFriend(n){
 }
 function renderFriends(){
   document.getElementById('friendChips').innerHTML = friends.map(f=>
-    `<div class="chip">${f}<button onclick="removeFriend(${q(f)})" title="Remove">×</button></div>`
+    `<div class="chip">${xa(f)}<button class="chip-del" data-name="${xa(f)}" title="Remove">×</button></div>`
   ).join('');
+  document.querySelectorAll('.chip-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>removeFriend(btn.dataset.name));
+  });
 }
 function renderPayerSel(id, current=''){
   document.getElementById(id).innerHTML = '<option value="">Who paid?</option>' +
