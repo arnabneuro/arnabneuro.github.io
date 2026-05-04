@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Frequency Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #090c10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    gap: 14px;
+  }
+  .title { font-size: 0.6rem; color: #4fc3f7; letter-spacing: 0.35em; text-transform: uppercase; text-align: center; }
+  .panel {
+    width: 100%; max-width: 660px;
+    background: #0d1117;
+    border: 1px solid #1c2a3a;
+    border-radius: 4px;
+  }
+  .panel-label {
+    padding: 4px 10px;
+    border-bottom: 1px solid #1c2a3a;
+    font-size: 0.52rem;
+    color: #4a6a8a;
+    letter-spacing: 0.25em;
+  }
+  canvas { width: 100%; display: block; }
+  .freq-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 8px 4px;
+    font-size: 0.48rem;
+    color: #2a4a6a;
+  }
+  .readouts {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 660px;
+  }
+  .readout {
+    flex: 1;
+    background: #0d1117;
+    border: 1px solid #1c2a3a;
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+  .readout-label { font-size: 0.5rem; color: #4a6a8a; letter-spacing: 0.25em; margin-bottom: 5px; }
+  .readout-value { font-size: 1.3rem; letter-spacing: 0.05em; }
+  button {
+    margin-top: 4px;
+    padding: 10px 40px;
+    background: transparent;
+    border: 1px solid #4fc3f7;
+    color: #4fc3f7;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    border-radius: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  button:hover { background: rgba(79,195,247,0.1); box-shadow: 0 0 16px rgba(79,195,247,0.3); }
+  button.stop { border-color: #ef5350; color: #ef5350; }
+  button.stop:hover { background: rgba(239,83,80,0.1); box-shadow: 0 0 16px rgba(239,83,80,0.3); }
+  #error { font-size: 0.65rem; color: #ef5350; letter-spacing: 0.1em; text-align: center; }
+  .footer { font-size: 0.5rem; color: #2a3a4a; letter-spacing: 0.2em; }
+</style>
+</head>
+<body>
+
+<div class="title">Physics Lab · Audio Frequency Analyzer</div>
+
+<div class="panel">
+  <div class="panel-label">CH·1 &nbsp; WAVEFORM (TIME DOMAIN)</div>
+  <canvas id="wave" height="120"></canvas>
+</div>
+
+<div class="panel">
+  <div class="panel-label">CH·2 &nbsp; SPECTRUM (FFT)</div>
+  <canvas id="spec" height="120"></canvas>
+  <div class="freq-labels">
+    <span>20Hz</span><span>100</span><span>500</span>
+    <span>1k</span><span>5k</span><span>10k</span><span>20k</span>
+  </div>
+</div>
+
+<div class="readouts">
+  <div class="readout">
+    <div class="readout-label">FREQUENCY</div>
+    <div class="readout-value" id="freqVal" style="color:#ff8a50;text-shadow:0 0 10px #ff8a5099">—</div>
+  </div>
+  <div class="readout">
+    <div class="readout-label">NOTE</div>
+    <div class="readout-value" id="noteVal" style="color:#ffd54f;text-shadow:0 0 10px #ffd54f99">—</div>
+  </div>
+  <div class="readout">
+    <div class="readout-label">LEVEL</div>
+    <div class="readout-value" id="dbVal" style="color:#66bb6a;text-shadow:0 0 10px #66bb6a99">—</div>
+  </div>
+</div>
+
+<button id="btn" onclick="toggle()">▶ Start Microphone</button>
+<div id="error"></div>
+<div class="footer">WEB AUDIO API · FFT 2048pt · 20Hz–20kHz</div>
+
+<script>
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let running = false, audioCtx, analyser, stream, raf;
+
+const waveCanvas = document.getElementById('wave');
+const specCanvas = document.getElementById('spec');
+const btn = document.getElementById('btn');
+
+// Match canvas pixel width to display width
+function resize() {
+  const w = waveCanvas.offsetWidth;
+  waveCanvas.width = w;
+  specCanvas.width = w;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function freqToNote(f) {
+  if (!f || f < 20) return '—';
+  const n = 12 * Math.log2(f / 440) + 49;
+  return NOTES[((Math.round(n) - 1) % 12 + 12) % 12] + Math.floor((Math.round(n) + 8) / 12);
+}
+
+async function toggle() {
+  if (!running) {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtx = new AudioContext();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.8;
+      audioCtx.createMediaStreamSource(stream).connect(analyser);
+      running = true;
+      btn.textContent = '■ Stop';
+      btn.className = 'stop';
+      document.getElementById('error').textContent = '';
+      draw();
+    } catch (e) {
+      document.getElementById('error').textContent = 'Mic access denied — please allow microphone permission.';
+    }
+  } else {
+    cancelAnimationFrame(raf);
+    stream.getTracks().forEach(t => t.stop());
+    audioCtx.close();
+    running = false;
+    btn.textContent = '▶ Start Microphone';
+    btn.className = '';
+    document.getElementById('freqVal').textContent = '—';
+    document.getElementById('noteVal').textContent = '—';
+    document.getElementById('dbVal').textContent = '—';
+    clearCanvas();
+  }
+}
+
+function clearCanvas() {
+  [waveCanvas, specCanvas].forEach(c => {
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0d1117';
+    ctx.fillRect(0, 0, c.width, c.height);
+    drawGrid(ctx, c.width, c.height);
+  });
+  // flat line
+  const ctx = waveCanvas.getContext('2d');
+  ctx.strokeStyle = 'rgba(79,195,247,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, waveCanvas.height / 2);
+  ctx.lineTo(waveCanvas.width, waveCanvas.height / 2);
+  ctx.stroke();
+}
+
+function drawGrid(ctx, W, H) {
+  ctx.strokeStyle = 'rgba(100,180,255,0.07)';
+  ctx.lineWidth = 1;
+  for (let x = 50; x < W; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+  for (let y = 30; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+  // center line
+  ctx.strokeStyle = 'rgba(100,180,255,0.13)';
+  ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+}
+
+function draw() {
+  raf = requestAnimationFrame(draw);
+  const bufLen = analyser.frequencyBinCount;
+  const timeData = new Uint8Array(analyser.fftSize);
+  const freqData = new Uint8Array(bufLen);
+  analyser.getByteTimeDomainData(timeData);
+  analyser.getByteFrequencyData(freqData);
+
+  const W1 = waveCanvas.width, H1 = waveCanvas.height;
+  const W2 = specCanvas.width, H2 = specCanvas.height;
+
+  // ── Waveform ──
+  const wCtx = waveCanvas.getContext('2d');
+  wCtx.fillStyle = '#0d1117';
+  wCtx.fillRect(0, 0, W1, H1);
+  drawGrid(wCtx, W1, H1);
+  wCtx.strokeStyle = '#4fc3f7';
+  wCtx.lineWidth = 1.5;
+  wCtx.shadowBlur = 6;
+  wCtx.shadowColor = '#4fc3f7';
+  wCtx.beginPath();
+  for (let i = 0; i < timeData.length; i++) {
+    const x = (i / timeData.length) * W1;
+    const y = ((timeData[i] / 255) - 0.5) * H1 * 0.8 + H1 / 2;
+    i === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+  }
+  wCtx.stroke();
+  wCtx.shadowBlur = 0;
+
+  // ── Spectrum ──
+  const sCtx = specCanvas.getContext('2d');
+  sCtx.fillStyle = '#0d1117';
+  sCtx.fillRect(0, 0, W2, H2);
+  drawGrid(sCtx, W2, H2);
+  const bins = Math.floor(bufLen * 0.6);
+  const bw = W2 / bins;
+  for (let i = 0; i < bins; i++) {
+    const bh = (freqData[i] / 255) * H2;
+    const t = freqData[i] / 255;
+    sCtx.fillStyle = `rgba(${Math.round(t*60)},${Math.round(150+t*105)},${Math.round(200+t*55)},0.85)`;
+    sCtx.fillRect(i * bw, H2 - bh, Math.max(1, bw - 0.5), bh);
+  }
+
+  // ── Metrics ──
+  let maxV = 0, maxI = 0;
+  for (let i = 2; i < bins; i++) { if (freqData[i] > maxV) { maxV = freqData[i]; maxI = i; } }
+  const freq = maxV > 20 ? (maxI / bufLen) * (audioCtx.sampleRate / 2) : null;
+
+  let rms = 0;
+  for (let i = 0; i < timeData.length; i++) { const v=(timeData[i]-128)/128; rms+=v*v; }
+  rms = Math.sqrt(rms / timeData.length);
+  const db = rms > 0.001 ? Math.round(20 * Math.log10(rms)) : -60;
+
+  document.getElementById('freqVal').textContent = freq
+    ? (freq < 1000 ? freq.toFixed(1)+' Hz' : (freq/1000).toFixed(2)+' kHz') : '—';
+  document.getElementById('noteVal').textContent = freqToNote(freq);
+
+  const dbEl = document.getElementById('dbVal');
+  dbEl.textContent = db > -60 ? db + ' dB' : '—';
+  const col = db > -10 ? '#ef5350' : db > -20 ? '#ffa726' : '#66bb6a';
+  dbEl.style.color = col;
+  dbEl.style.textShadow = `0 0 10px ${col}99`;
+}
+
+clearCanvas();
+</script>
+</body>
+</html>
