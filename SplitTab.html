@@ -6,251 +6,404 @@
 <title>Split Tab — Bill Splitter</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
-  --bg: #0d0d0d; --surface: #161616; --surface2: #1e1e1e; --surface3: #242424;
-  --border: #2a2a2a; --accent: #c8f135; --accent-dim: #a8cc20;
-  --text: #f0f0f0; --muted: #666; --red: #ff5f5f; --r: 12px;
+  --bg:#0a0a0a; --surface:#131313; --surface2:#1a1a1a; --surface3:#202020;
+  --border:#252525; --border2:#303030;
+  --accent:#c8f135; --accent-dim:#a8cc20; --accent-glow:rgba(200,241,53,.1);
+  --text:#efefef; --muted:#555; --muted2:#3a3a3a; --red:#ff5f5f; --r:14px;
 }
-body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:2rem 1rem 5rem; }
+body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:1.25rem 1rem 7rem; }
+.container { max-width:680px; margin:0 auto; }
 
-header { text-align:center; margin-bottom:2.5rem; }
-header h1 { font-size:clamp(2.4rem,8vw,4rem); font-weight:800; letter-spacing:-2px; line-height:1; }
-header h1 span { color:var(--accent); }
-header p { color:var(--muted); margin-top:.5rem; font-size:.9rem; font-family:'JetBrains Mono',monospace; }
-.save-badge { display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-family:'JetBrains Mono',monospace; color:var(--muted); margin-top:.6rem; transition:color .3s; }
+/* ── App header ── */
+.app-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding:.7rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); }
+.app-logo h1 { font-size:1.35rem; font-weight:800; letter-spacing:-1px; line-height:1; }
+.app-logo h1 span { color:var(--accent); }
+.app-logo-sub { font-size:.6rem; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:1px; margin-top:.15rem; }
+.header-actions { display:flex; align-items:center; gap:.35rem; }
+.hbtn { display:flex; align-items:center; gap:.3rem; background:var(--surface2); border:1px solid var(--border); border-radius:9px; color:var(--muted); font-family:'Syne',sans-serif; font-size:.73rem; font-weight:700; padding:.4rem .7rem; cursor:pointer; transition:all .15s; }
+.hbtn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.save-badge { display:flex; align-items:center; gap:.3rem; font-size:.62rem; font-family:'JetBrains Mono',monospace; color:var(--muted); padding:.38rem .6rem; transition:color .3s; }
 .save-badge.saved { color:var(--accent); }
-.save-dot { width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s; }
-.save-badge.saved .save-dot { background:var(--accent); }
+.save-dot { width:6px; height:6px; border-radius:50%; background:var(--muted2); flex-shrink:0; transition:background .3s,box-shadow .3s; }
+.save-badge.saved .save-dot { background:var(--accent); box-shadow:0 0 6px var(--accent); }
 
-.container { max-width:720px; margin:0 auto; }
-.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:1.5rem; margin-bottom:1.2rem; }
-.card-title { font-size:.68rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:1.2rem; }
-hr.div { border:none; border-top:1px solid var(--border); margin:1.2rem 0; }
+/* ── Trip strip ── */
+.trip-strip { display:flex; align-items:center; gap:.55rem; padding:.5rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:11px; margin-bottom:.9rem; cursor:pointer; transition:border-color .15s; }
+.trip-strip:hover { border-color:var(--border2); }
+.trip-strip-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 5px var(--accent); flex-shrink:0; animation:pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.trip-strip-label { font-size:.56rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+.trip-strip-name { font-weight:700; font-size:.86rem; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.trip-strip-meta { font-size:.63rem; color:var(--muted); font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+.trip-strip-caret { color:var(--muted); font-size:.65rem; flex-shrink:0; }
 
+/* ── Tab nav ── */
+.tab-nav { display:grid; grid-template-columns:repeat(3,1fr); background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:.28rem; margin-bottom:1rem; gap:.22rem; }
+.tab-nav-btn { padding:.58rem .4rem; border:none; border-radius:10px; font-family:'Syne',sans-serif; font-size:.78rem; font-weight:700; cursor:pointer; background:transparent; color:var(--muted); transition:all .18s; display:flex; align-items:center; justify-content:center; gap:.3rem; letter-spacing:.3px; }
+.tab-icon { font-size:.95rem; line-height:1; }
+.tab-nav-btn.active { background:var(--accent); color:#0a0a0a; box-shadow:0 2px 10px rgba(200,241,53,.22); }
+.tab-nav-btn:not(.active):hover { color:var(--text); background:var(--surface2); }
+.tab-panel { display:none; animation:fadeUp .18s ease; }
+.tab-panel.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Cards ── */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:1.25rem; margin-bottom:.9rem; }
+.card-title { font-size:.58rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:1rem; opacity:.75; }
+hr.div { border:none; border-top:1px solid var(--border); margin:1.1rem 0; }
+
+/* ── Inputs ── */
 input[type=text], input[type=number], select {
-  background:var(--surface2); border:1px solid var(--border); border-radius:8px;
-  color:var(--text); font-family:'Syne',sans-serif; font-size:.92rem;
-  padding:.6rem .9rem; outline:none; transition:border-color .2s; width:100%;
+  background:var(--surface2); border:1.5px solid var(--border); border-radius:9px;
+  color:var(--text); font-family:'Syne',sans-serif; font-size:.88rem;
+  padding:.62rem .95rem; outline:none; transition:border-color .2s,box-shadow .2s; width:100%;
 }
-input:focus, select:focus { border-color:var(--accent); }
+input:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
 input::placeholder { color:var(--muted); }
 select { cursor:pointer; }
-.row { display:flex; gap:.6rem; }
+.row { display:flex; gap:.45rem; }
 .row > * { flex:1; min-width:0; }
 .shrink { flex:0 0 auto !important; }
 
-.btn { background:var(--accent); color:#0d0d0d; border:none; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:.88rem; padding:.6rem 1.1rem; cursor:pointer; white-space:nowrap; transition:background .15s,transform .1s; }
-.btn:hover { background:var(--accent-dim); }
+/* ── Buttons ── */
+.btn { background:var(--accent); color:#0a0a0a; border:none; border-radius:9px; font-family:'Syne',sans-serif; font-weight:800; font-size:.86rem; padding:.62rem 1.15rem; cursor:pointer; white-space:nowrap; transition:background .15s,transform .1s,box-shadow .15s; }
+.btn:hover { background:var(--accent-dim); box-shadow:0 3px 14px rgba(200,241,53,.28); }
 .btn:active { transform:scale(.97); }
-.btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); }
-.btn-ghost:hover { background:var(--surface2); color:var(--text); }
-.btn-danger { background:transparent; color:var(--red); border:1px solid #3a1a1a; }
-.btn-danger:hover { background:#1f0a0a; color:var(--red); }
-.btn-sm { padding:.38rem .8rem; font-size:.8rem; }
-.icon-btn { background:none; border:none; cursor:pointer; padding:3px 6px; font-size:.95rem; line-height:1; transition:opacity .15s; color:var(--muted); }
-.icon-btn:hover { opacity:1; color:var(--text); }
-.icon-btn.del:hover { color:var(--red); }
-.icon-btn.edit:hover { color:var(--accent); }
+.btn-ghost { background:transparent; color:var(--muted); border:1.5px solid var(--border); }
+.btn-ghost:hover { background:var(--surface2); color:var(--text); border-color:var(--border2); }
+.btn-danger { background:transparent; color:var(--red); border:1.5px solid rgba(255,95,95,.18); }
+.btn-danger:hover { background:rgba(255,95,95,.06); }
+.btn-sm { padding:.36rem .8rem; font-size:.76rem; }
+.icon-btn { background:none; border:none; cursor:pointer; padding:4px 7px; font-size:.9rem; line-height:1; transition:all .15s; color:var(--muted); border-radius:6px; }
+.icon-btn:hover { color:var(--text); background:var(--surface2); }
+.icon-btn.del:hover { color:var(--red); background:rgba(255,95,95,.07); }
+.icon-btn.edit:hover { color:var(--accent); background:var(--accent-glow); }
 
-.chips { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.8rem; }
-.chip { display:flex; align-items:center; gap:.4rem; background:var(--surface2); border:1px solid var(--border); border-radius:999px; padding:.32rem .85rem; font-size:.88rem; font-weight:600; animation:popIn .2s ease; }
-@keyframes popIn { from{transform:scale(.7);opacity:0} to{transform:scale(1);opacity:1} }
-.chip button { background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:0;transition:color .15s; }
-.chip button:hover { color:var(--red); }
+/* ── Chips ── */
+.chips { display:flex; flex-wrap:wrap; gap:.38rem; margin-bottom:.85rem; min-height:1.5rem; }
+.chip { display:flex; align-items:center; gap:.38rem; background:var(--surface2); border:1.5px solid var(--border); border-radius:999px; padding:.28rem .88rem .28rem .72rem; font-size:.82rem; font-weight:700; animation:popIn .22s cubic-bezier(.34,1.5,.64,1); }
+@keyframes popIn { from{transform:scale(.55);opacity:0} to{transform:scale(1);opacity:1} }
+.chip-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.9rem; line-height:1; padding:0; transition:color .15s; display:flex; align-items:center; }
+.chip-del:hover { color:var(--red); }
 
-.exp-list { display:flex; flex-direction:column; gap:.55rem; }
-.exp-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:.85rem 1rem; display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:.7rem; animation:slideIn .2s ease; }
-@keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-.exp-desc { font-weight:700; font-size:.93rem; }
-.exp-meta { font-size:.75rem; color:var(--muted); margin-top:.15rem; font-family:'JetBrains Mono',monospace; }
-.exp-amt { font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:600; color:var(--accent); white-space:nowrap; }
-.exp-actions { display:flex; gap:2px; }
+/* ── Expense list ── */
+.exp-list { display:flex; flex-direction:column; gap:.4rem; }
+.exp-item { background:var(--surface2); border:1.5px solid var(--border); border-radius:11px; padding:.8rem 1rem; display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:.6rem; animation:slideIn .2s ease; transition:border-color .15s; }
+.exp-item:hover { border-color:var(--border2); }
+@keyframes slideIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+.exp-desc { font-weight:700; font-size:.88rem; }
+.exp-meta { font-size:.7rem; color:var(--muted); margin-top:.1rem; font-family:'JetBrains Mono',monospace; }
+.exp-amt { font-family:'JetBrains Mono',monospace; font-size:.98rem; font-weight:700; color:var(--accent); white-space:nowrap; }
+.exp-actions { display:flex; gap:1px; }
 
-.split-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:.6rem; }
-.split-tab { flex:1; padding:.42rem; font-family:'Syne',sans-serif; font-size:.75rem; font-weight:700; background:transparent; border:none; color:var(--muted); cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:1px; }
-.split-tab.active { background:var(--accent); color:#0d0d0d; }
+/* ── Split toggle ── */
+.split-toggle { display:flex; background:var(--surface2); border:1.5px solid var(--border); border-radius:9px; overflow:hidden; margin-bottom:.6rem; }
+.split-tab { flex:1; padding:.42rem .25rem; font-family:'Syne',sans-serif; font-size:.7rem; font-weight:700; background:transparent; border:none; color:var(--muted); cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.7px; }
+.split-tab.active { background:var(--accent); color:#0a0a0a; }
 
+/* ── Participants ── */
 .part-check { display:none; }
-.part-label { background:var(--surface2); border:1px solid var(--border); border-radius:999px; padding:.28rem .75rem; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; user-select:none; display:inline-block; }
-.part-check:checked + .part-label { background:var(--accent); border-color:var(--accent); color:#0d0d0d; }
-.parts-row { display:flex; flex-wrap:wrap; gap:.4rem; }
-.lbl { font-size:.7rem; color:var(--muted); margin-bottom:.4rem; letter-spacing:1.5px; text-transform:uppercase; }
+.part-label { background:var(--surface2); border:1.5px solid var(--border); border-radius:999px; padding:.28rem .78rem; font-size:.77rem; font-weight:700; cursor:pointer; transition:all .15s; user-select:none; display:inline-block; }
+.part-check:checked + .part-label { background:var(--accent); border-color:var(--accent); color:#0a0a0a; }
+.parts-row { display:flex; flex-wrap:wrap; gap:.38rem; }
+.lbl { font-size:.62rem; color:var(--muted); margin-bottom:.42rem; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
 
-.csplit-grid { display:flex; flex-direction:column; gap:.4rem; }
-.csplit-row { display:flex; align-items:center; gap:.6rem; }
-.csplit-row label { font-size:.88rem; font-weight:600; min-width:70px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* ── Custom splits ── */
+.csplit-grid { display:flex; flex-direction:column; gap:.38rem; }
+.csplit-row { display:flex; align-items:center; gap:.55rem; }
+.csplit-row label { font-size:.84rem; font-weight:700; min-width:70px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .csplit-row input { max-width:110px !important; flex:0 0 auto !important; }
-.csplit-row .unit { font-size:.75rem; color:var(--muted); font-family:'JetBrains Mono',monospace; white-space:nowrap; flex-shrink:0; }
-.split-sum { font-family:'JetBrains Mono',monospace; font-size:.78rem; margin-top:.5rem; padding:.35rem .6rem; border-radius:6px; background:var(--surface3); }
+.csplit-row .unit { font-size:.7rem; color:var(--muted); font-family:'JetBrains Mono',monospace; white-space:nowrap; flex-shrink:0; }
+.split-sum { font-family:'JetBrains Mono',monospace; font-size:.73rem; margin-top:.5rem; padding:.36rem .68rem; border-radius:7px; background:var(--surface3); }
 .split-sum.ok { color:var(--accent); }
 .split-sum.bad { color:var(--red); }
 
-.balance-block { margin-bottom:.4rem; }
-.balance-row { display:flex; justify-content:space-between; align-items:center; padding:.7rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); cursor:pointer; transition:border-color .15s; }
+/* ── Balances ── */
+.balance-block { margin-bottom:.38rem; }
+.balance-row { display:flex; justify-content:space-between; align-items:center; padding:.72rem 1rem; background:var(--surface2); border-radius:10px; border:1.5px solid var(--border); cursor:pointer; transition:border-color .15s; }
+.balance-row:hover { border-color:var(--border2); }
 .balance-row.open { border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom-color:transparent; }
-.balance-name { font-weight:700; display:flex; align-items:center; gap:.5rem; font-size:.93rem; }
-.caret { font-size:.65rem; color:var(--muted); transition:transform .2s; display:inline-block; }
+.balance-name { font-weight:700; display:flex; align-items:center; gap:.45rem; font-size:.88rem; }
+.caret { font-size:.58rem; color:var(--muted); transition:transform .2s; display:inline-block; }
 .balance-row.open .caret { transform:rotate(90deg); }
-.balance-amt { font-family:'JetBrains Mono',monospace; font-weight:600; font-size:.95rem; }
+.balance-amt { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.9rem; }
 .pos { color:var(--accent); } .neg { color:var(--red); } .zero { color:var(--muted); }
-
-.breakdown { background:var(--surface3); border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; padding:.6rem 1rem; display:none; }
+.breakdown { background:var(--surface3); border:1.5px solid var(--border); border-top:none; border-radius:0 0 10px 10px; padding:.6rem 1rem; display:none; }
 .breakdown.open { display:block; }
-.bd-item { display:flex; justify-content:space-between; align-items:baseline; padding:.3rem 0; border-bottom:1px solid var(--border); font-size:.82rem; }
+.bd-item { display:flex; justify-content:space-between; align-items:baseline; padding:.3rem 0; border-bottom:1px solid var(--border); font-size:.78rem; }
 .bd-item:last-child { border-bottom:none; }
 .bd-left { flex:1; }
 .bd-desc { color:var(--text); }
-.bd-sub { font-size:.7rem; color:var(--muted); margin-top:.05rem; font-family:'JetBrains Mono',monospace; }
-.bd-amt { font-family:'JetBrains Mono',monospace; font-weight:600; white-space:nowrap; margin-left:.8rem; }
+.bd-sub { font-size:.67rem; color:var(--muted); margin-top:.05rem; font-family:'JetBrains Mono',monospace; }
+.bd-amt { font-family:'JetBrains Mono',monospace; font-weight:700; white-space:nowrap; margin-left:.8rem; }
 
-.sett-item { display:flex; align-items:center; gap:.7rem; padding:.7rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); font-size:.9rem; margin-bottom:.4rem; }
+/* ── Settlements ── */
+.sett-item { display:flex; align-items:center; gap:.6rem; padding:.68rem 1rem; background:var(--surface2); border-radius:9px; border:1.5px solid var(--border); font-size:.86rem; margin-bottom:.36rem; }
 .sett-item .arr { color:var(--accent); }
-.sett-item strong { font-family:'JetBrains Mono',monospace; color:var(--accent); margin-left:auto; }
+.sett-item strong { font-family:'JetBrains Mono',monospace; color:var(--accent); margin-left:auto; font-weight:700; }
 
-/* Undo toast */
-.toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(120px); background:#1e1e1e; border:1px solid var(--border); border-radius:10px; padding:.75rem 1.1rem; display:flex; align-items:center; gap:1rem; font-size:.87rem; z-index:200; transition:transform .35s cubic-bezier(.34,1.4,.64,1); white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,.7); }
+/* ── Bottom bar ── */
+.bottom-bar { display:flex; justify-content:space-between; align-items:center; margin-top:1rem; gap:.6rem; flex-wrap:wrap; }
+.total-line { font-family:'JetBrains Mono',monospace; font-size:.8rem; color:var(--muted); }
+.total-line span { color:var(--accent); font-size:1.1rem; font-weight:800; }
+.empty { text-align:center; color:var(--muted); font-size:.8rem; padding:2rem 0; font-family:'JetBrains Mono',monospace; }
+
+/* ── Toast ── */
+.toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(120px); background:var(--surface2); border:1.5px solid var(--border); border-radius:12px; padding:.72rem 1.1rem; display:flex; align-items:center; gap:1rem; font-size:.83rem; z-index:200; transition:transform .35s cubic-bezier(.34,1.4,.64,1); white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,.7); }
 .toast.show { transform:translateX(-50%) translateY(0); }
-.toast-undo { background:var(--accent); color:#0d0d0d; border:none; border-radius:6px; font-family:'Syne',sans-serif; font-weight:700; font-size:.8rem; padding:.3rem .75rem; cursor:pointer; }
+.toast-undo { background:var(--accent); color:#0a0a0a; border:none; border-radius:7px; font-family:'Syne',sans-serif; font-weight:800; font-size:.76rem; padding:.3rem .78rem; cursor:pointer; }
 
-/* Modal */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,.82); display:flex; align-items:center; justify-content:center; z-index:100; backdrop-filter:blur(5px); animation:fi .15s ease; }
+/* ── Undo/Redo FAB ── */
+.undo-fab { position:fixed; bottom:1.4rem; right:1rem; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; display:flex; align-items:center; z-index:199; box-shadow:0 4px 24px rgba(0,0,0,.6); opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .25s,transform .25s; overflow:hidden; }
+.undo-fab.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
+.undo-fab-btn { display:flex; align-items:center; gap:.32rem; font-family:'Syne',sans-serif; font-size:.75rem; font-weight:700; color:var(--muted); cursor:pointer; background:none; border:none; padding:.52rem .78rem; transition:color .15s,background .15s; }
+.undo-fab-btn:hover:not(:disabled) { color:var(--accent); background:var(--accent-glow); }
+.undo-fab-btn:disabled { opacity:.22; cursor:not-allowed; }
+.undo-fab-divider { width:1px; background:var(--border); align-self:stretch; }
+.undo-count { background:var(--accent); color:#0a0a0a; border-radius:999px; font-size:.63rem; padding:.04rem .36rem; font-weight:800; }
+
+/* ── Modal ── */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.88); display:flex; align-items:center; justify-content:center; z-index:100; backdrop-filter:blur(10px); animation:fi .15s ease; padding:1rem; }
 @keyframes fi { from{opacity:0} to{opacity:1} }
-.modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; width:min(500px,93vw); animation:su .2s ease; max-height:90vh; overflow-y:auto; }
-@keyframes su { from{transform:translateY(14px);opacity:0} to{transform:translateY(0);opacity:1} }
-.modal h2 { font-size:1.2rem; font-weight:800; margin-bottom:.25rem; }
-.modal .sub { color:var(--muted); font-size:.8rem; font-family:'JetBrains Mono',monospace; margin-bottom:1.3rem; }
-.mlabel { font-size:.68rem; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:.35rem; margin-top:.9rem; }
+.modal { background:var(--surface); border:1.5px solid var(--border); border-radius:18px; padding:1.6rem; width:min(480px,100%); animation:su .22s cubic-bezier(.34,1.2,.64,1); max-height:90vh; overflow-y:auto; }
+@keyframes su { from{transform:translateY(14px) scale(.96);opacity:0} to{transform:none;opacity:1} }
+.modal h2 { font-size:1.12rem; font-weight:800; margin-bottom:.2rem; }
+.modal .sub { color:var(--muted); font-size:.74rem; font-family:'JetBrains Mono',monospace; margin-bottom:1.15rem; }
+.mlabel { font-size:.6rem; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; margin-bottom:.32rem; margin-top:.85rem; }
 .mlabel:first-child { margin-top:0; }
-.mfooter { display:flex; gap:.6rem; justify-content:flex-end; margin-top:1.4rem; flex-wrap:wrap; }
-.reset-warn { background:#190505; border:1px solid #400; border-radius:8px; padding:.9rem 1rem; margin-bottom:1rem; font-size:.87rem; color:#ffbbbb; }
+.mfooter { display:flex; gap:.5rem; justify-content:flex-end; margin-top:1.25rem; flex-wrap:wrap; }
+.reset-warn { background:rgba(255,95,95,.05); border:1.5px solid rgba(255,95,95,.18); border-radius:9px; padding:.85rem 1rem; margin-bottom:1rem; font-size:.83rem; color:#ffbbbb; }
 .reset-warn strong { color:var(--red); display:block; margin-bottom:.3rem; }
 
-.bottom-bar { display:flex; justify-content:space-between; align-items:center; margin-top:1rem; gap:.6rem; flex-wrap:wrap; }
-.total-line { font-family:'JetBrains Mono',monospace; font-size:.88rem; color:var(--muted); }
-.total-line span { color:var(--accent); font-size:1.2rem; font-weight:700; }
-.empty { text-align:center; color:var(--muted); font-size:.87rem; padding:1.4rem 0; font-family:'JetBrains Mono',monospace; }
-
-@media print {
-  body { background:#fff; color:#000; padding:1rem; }
-  .no-print, .exp-actions, header .save-badge { display:none!important; }
-  .card { border:1px solid #ddd; background:#fff; break-inside:avoid; }
-  .card-title { color:#555; }
-  .exp-item,.balance-row,.sett-item,.breakdown { background:#f9f9f9; border-color:#ddd; }
-  .exp-amt, .pos { color:#2a7a00; } .neg { color:#c00; }
-  header h1 span { color:#2a7a00; }
-  .breakdown { display:block!important; border-radius:0 0 6px 6px; }
-}
-/* Itemized split */
-.item-list { display:flex; flex-direction:column; gap:.45rem; }
-.item-row { display:grid; grid-template-columns:1fr 90px auto; gap:.5rem; align-items:center; animation:popIn .15s ease; }
+/* ── Itemized ── */
+.item-list { display:flex; flex-direction:column; gap:.4rem; }
+.item-row { display:grid; grid-template-columns:1fr 88px auto; gap:.42rem; align-items:center; animation:popIn .15s ease; }
 .item-row input { width:100%; }
-.item-row .item-assignees { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:.3rem; padding:.25rem 0 .1rem; }
-.item-assignee-btn { background:var(--surface3); border:1px solid var(--border); border-radius:999px; padding:.2rem .65rem; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .12s; color:var(--muted); }
-.item-assignee-btn.on { background:var(--accent); border-color:var(--accent); color:#0d0d0d; }
+.item-row .item-assignees { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:.28rem; padding:.2rem 0 .1rem; }
+.item-assignee-btn { background:var(--surface3); border:1.5px solid var(--border); border-radius:999px; padding:.18rem .62rem; font-size:.72rem; font-weight:700; cursor:pointer; transition:all .12s; color:var(--muted); }
+.item-assignee-btn.on { background:var(--accent); border-color:var(--accent); color:#0a0a0a; }
 .item-row-del { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1rem; padding:2px 5px; transition:color .12s; line-height:1; }
 .item-row-del:hover { color:var(--red); }
-.item-total { font-family:'JetBrains Mono',monospace; font-size:.78rem; padding:.35rem .6rem; border-radius:6px; background:var(--surface3); color:var(--accent); margin-top:.3rem; }
-.add-item-btn { background:transparent; border:1px dashed var(--border); border-radius:8px; color:var(--muted); font-family:'Syne',sans-serif; font-size:.82rem; font-weight:600; padding:.45rem; width:100%; cursor:pointer; margin-top:.4rem; transition:all .15s; }
-.add-item-btn:hover { border-color:var(--accent); color:var(--accent); }
+.item-total { font-family:'JetBrains Mono',monospace; font-size:.73rem; padding:.33rem .68rem; border-radius:7px; background:var(--surface3); color:var(--accent); margin-top:.3rem; }
+.add-item-btn { background:transparent; border:1.5px dashed var(--border); border-radius:9px; color:var(--muted); font-family:'Syne',sans-serif; font-size:.78rem; font-weight:700; padding:.48rem; width:100%; cursor:pointer; margin-top:.38rem; transition:all .15s; }
+.add-item-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.exp-tag { display:inline-block; font-size:.6rem; font-family:'JetBrains Mono',monospace; background:var(--surface3); border:1px solid var(--border); border-radius:4px; padding:.04rem .3rem; color:var(--muted); margin-left:.3rem; vertical-align:middle; }
 .exp-item.itemized .exp-meta::after { content:' · itemized'; }
-.exp-tag { display:inline-block; font-size:.65rem; font-family:'JetBrains Mono',monospace; background:var(--surface3); border:1px solid var(--border); border-radius:4px; padding:.05rem .35rem; color:var(--muted); margin-left:.4rem; vertical-align:middle; }
 
-@media(max-width:480px){
-  .row { flex-direction:column; }
-  .item-row { grid-template-columns:1fr 80px auto; }
+/* ── Export modal ── */
+.xbtn { display:flex; align-items:center; gap:.85rem; background:var(--surface2); border:1.5px solid var(--border); border-radius:11px; padding:.82rem .95rem; cursor:pointer; text-align:left; color:var(--text); font-family:'Syne',sans-serif; transition:border-color .15s,background .15s; width:100%; }
+.xbtn:hover { border-color:var(--accent); background:var(--accent-glow); }
+.xico { font-size:1.2rem; flex-shrink:0; }
+.xtitle { font-weight:700; font-size:.84rem; }
+.xsub { font-size:.67rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:.1rem; }
+
+/* ── Trips modal ── */
+.trip-list { display:flex; flex-direction:column; gap:.38rem; max-height:250px; overflow-y:auto; margin-bottom:.7rem; }
+.trip-item { display:flex; align-items:center; gap:.68rem; background:var(--surface2); border:1.5px solid var(--border); border-radius:11px; padding:.72rem .95rem; cursor:pointer; transition:border-color .15s; }
+.trip-item:hover { border-color:var(--accent); }
+.trip-item.current { border-color:var(--accent); background:var(--accent-glow); }
+.trip-item.archived { opacity:.38; }
+.trip-item-icon { font-size:1.2rem; flex-shrink:0; }
+.trip-item-info { flex:1; min-width:0; }
+.trip-item-name { font-weight:700; font-size:.85rem; }
+.trip-item-meta { font-size:.65rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:.1rem; }
+.trip-badge { font-size:.57rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:.12rem .4rem; border-radius:4px; background:var(--accent); color:#0a0a0a; flex-shrink:0; }
+.trip-badge.arch { background:var(--surface3); color:var(--muted); }
+
+/* ── Profile modal ── */
+.profile-avatar { width:56px; height:56px; border-radius:50%; background:var(--accent); color:#0a0a0a; font-size:1.5rem; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto .85rem; }
+.currency-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:.36rem; margin-top:.38rem; }
+.currency-btn { background:var(--surface2); border:1.5px solid var(--border); border-radius:8px; padding:.48rem .3rem; font-family:'Syne',sans-serif; font-size:.86rem; font-weight:700; cursor:pointer; color:var(--muted); transition:all .15s; text-align:center; }
+.currency-btn.sel { background:var(--accent); border-color:var(--accent); color:#0a0a0a; }
+
+/* ── Startup Import ── */
+.startup-overlay { position:fixed; inset:0; background:rgba(0,0,0,.92); display:flex; align-items:center; justify-content:center; z-index:300; backdrop-filter:blur(12px); animation:fi .2s ease; padding:1rem; }
+.startup-modal { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:2rem 1.75rem; width:min(460px,100%); text-align:center; animation:su .25s cubic-bezier(.34,1.2,.64,1); }
+.startup-logo { font-size:1.5rem; font-weight:800; letter-spacing:-1px; margin-bottom:.2rem; }
+.startup-logo span { color:var(--accent); }
+.startup-sub { font-size:.65rem; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:1.5px; margin-bottom:1.6rem; }
+.startup-drop { border:2px dashed var(--border2); border-radius:14px; padding:2rem 1.5rem; cursor:pointer; transition:all .2s; margin-bottom:1rem; position:relative; }
+.startup-drop:hover, .startup-drop.drag-over { border-color:var(--accent); background:var(--accent-glow); }
+.startup-drop-icon { font-size:2.2rem; margin-bottom:.6rem; }
+.startup-drop-title { font-weight:700; font-size:.95rem; margin-bottom:.3rem; }
+.startup-drop-hint { font-size:.72rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.startup-divider { display:flex; align-items:center; gap:.75rem; color:var(--muted); font-size:.7rem; font-family:'JetBrains Mono',monospace; margin:.5rem 0 .9rem; }
+.startup-divider::before, .startup-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.startup-fresh { font-size:.8rem; color:var(--muted); margin-top:.35rem; cursor:pointer; background:none; border:none; font-family:'Syne',sans-serif; font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color .15s; }
+.startup-fresh:hover { color:var(--text); }
+
+/* ── Print ── */
+@media print {
+  body { background:#fff; color:#000; padding:1rem; }
+  .no-print, .exp-actions { display:none!important; }
+  .card { border:1px solid #ddd; background:#fff; break-inside:avoid; }
+  .exp-item,.balance-row,.sett-item,.breakdown { background:#f9f9f9; border-color:#ddd; }
+  .exp-amt,.pos { color:#2a7a00; } .neg { color:#c00; }
+  .breakdown { display:block!important; }
 }
+
+/* ── Mobile ── */
+@media(max-width:480px){
+  body { padding:1rem .75rem 7rem; }
+  .row { flex-direction:column; }
+  .item-row { grid-template-columns:1fr 75px auto; }
+  .tab-label { display:none; }
+  .tab-icon { font-size:1.15rem; }
+  .tab-nav-btn { padding:.62rem; }
+  .app-header { flex-wrap:wrap; gap:.5rem; padding:.6rem .75rem; }
+  .app-logo { flex:1; min-width:0; }
+  .header-actions { width:100%; justify-content:flex-end; gap:.28rem; }
+  .hbtn span { display:none; }
+  .hbtn { padding:.4rem .55rem; font-size:.85rem; }
+  .save-badge { font-size:.58rem; padding:.3rem .45rem; }
+}
+
 </style>
 </head>
 <body>
 <div class="container">
 
-  <header>
-    <h1>Split <span>Tab</span></h1>
-    <p>// who owes what, simplified</p>
-    <div style="display:flex;justify-content:center">
-      <span class="save-badge" id="saveBadge"><span class="save-dot"></span><span id="saveText">no data saved</span></span>
+  <header class="app-header">
+    <div class="app-logo">
+      <h1>Split <span>Tab</span></h1>
+      <div class="app-logo-sub">// who owes what, simplified</div>
     </div>
+    <div class="header-actions">
+      <span class="save-badge" id="saveBadge"><span class="save-dot"></span><span id="saveText">saved</span></span>
+      <button class="hbtn" onclick="triggerImportJSON()">📂 <span>Load</span></button>
+      <button class="hbtn" onclick="exportJSON()">💾 <span>Save</span></button>
+      <button class="hbtn" onclick="openTrips()">🗺 <span>Trips</span></button>
+      <button class="hbtn" onclick="openProfile()" id="profileBtn">👤 <span>Profile</span></button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importJSON(event)">
   </header>
 
-  <!-- 01 People -->
-  <div class="card">
-    <div class="card-title">01 — People</div>
-    <div class="chips" id="friendChips"></div>
-    <div class="row">
-      <input type="text" id="friendInput" placeholder="Add a name…" maxlength="24">
-      <button class="btn shrink" onclick="addFriend()">Add</button>
+  <!-- Trip strip -->
+  <div class="trip-strip no-print" id="tripBar" onclick="openTrips()">
+    <span class="trip-strip-dot"></span>
+    <span class="trip-strip-label">Trip</span>
+    <span class="trip-strip-name" id="tripBarName">—</span>
+    <span class="trip-strip-meta" id="tripBarMeta"></span>
+    <span class="trip-strip-caret">›</span>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav no-print">
+    <button class="tab-nav-btn active" id="tabPeople" onclick="switchTab('people')"><span class="tab-icon">👥</span><span class="tab-label">People</span></button>
+    <button class="tab-nav-btn" id="tabExpenses" onclick="switchTab('expenses')"><span class="tab-icon">💸</span><span class="tab-label">Expenses</span></button>
+    <button class="tab-nav-btn" id="tabOwes" onclick="switchTab('owes')"><span class="tab-icon">⚖️</span><span class="tab-label">Owes</span></button>
+  </div>
+
+  <!-- Panel: People -->
+  <div class="tab-panel active" id="panelPeople">
+    <div class="card">
+      <div class="card-title">People</div>
+      <div class="chips" id="friendChips"></div>
+      <div class="row">
+        <input type="text" id="friendInput" placeholder="Add a name…" maxlength="24">
+        <button class="btn shrink" onclick="addFriend()">Add</button>
+      </div>
     </div>
   </div>
 
-  <!-- 02 Expenses -->
-  <div class="card">
-    <div class="card-title">02 — Expenses</div>
-    <div style="display:grid;gap:.65rem">
-      <div class="row">
-        <input type="text" id="descInput" placeholder="Description (e.g. Dinner)">
-        <input type="number" id="amountInput" placeholder="Amount (€)" min="0" step="0.01" style="max-width:130px">
-      </div>
-      <div class="row">
-        <select id="payerSelect"><option value="">Who paid?</option></select>
-        <button class="btn shrink" onclick="submitExpense()">Add Expense</button>
-      </div>
-      <div>
-        <div class="lbl">Split mode</div>
-        <div class="split-toggle">
-          <button class="split-tab active" id="tabEqual" onclick="setSplitMode('equal')">Equal</button>
-          <button class="split-tab" id="tabCustom" onclick="setSplitMode('custom')">Custom €</button>
-          <button class="split-tab" id="tabPct" onclick="setSplitMode('percent')">Custom %</button>
-          <button class="split-tab" id="tabItemized" onclick="setSplitMode('itemized')">Itemized</button>
+  <!-- Panel: Expenses -->
+  <div class="tab-panel" id="panelExpenses">
+    <div class="card">
+      <div class="card-title">Expenses</div>
+      <div style="display:grid;gap:.65rem">
+        <div class="row">
+          <input type="text" id="descInput" placeholder="Description (e.g. Dinner)">
+          <input type="number" id="amountInput" placeholder="Amount" min="0" step="0.01" style="max-width:130px">
+        </div>
+        <div class="row" style="align-items:flex-end">
+          <div style="flex:1;min-width:0">
+            <div class="lbl">Who paid?</div>
+            <div class="parts-row" id="payerGrid"></div>
+          </div>
+          <button class="btn shrink" onclick="submitExpense()">Add</button>
+        </div>
+        <div>
+          <div class="lbl">Split mode</div>
+          <div class="split-toggle">
+            <button class="split-tab active" id="tabEqual" onclick="setSplitMode('equal')">Equal</button>
+            <button class="split-tab" id="tabCustom" onclick="setSplitMode('custom')">Custom €</button>
+            <button class="split-tab" id="tabPct" onclick="setSplitMode('percent')">Custom %</button>
+            <button class="split-tab" id="tabItemized" onclick="setSplitMode('itemized')">Itemized</button>
+          </div>
+        </div>
+        <div id="modeEqual">
+          <div class="lbl">Split between</div>
+          <div class="parts-row" id="participantsGrid"></div>
+        </div>
+        <div id="modeCustom" style="display:none">
+          <div class="lbl">Amount each person owes</div>
+          <div class="csplit-grid" id="customAmtGrid"></div>
+          <div class="split-sum" id="customAmtSum"></div>
+        </div>
+        <div id="modePct" style="display:none">
+          <div class="lbl">Percentage each person owes</div>
+          <div class="csplit-grid" id="customPctGrid"></div>
+          <div class="split-sum" id="customPctSum"></div>
+        </div>
+        <div id="modeItemized" style="display:none">
+          <div class="lbl">Line items — click names to assign each item</div>
+          <div class="item-list" id="itemizedGrid"></div>
+          <button class="add-item-btn" onclick="addItemRow('itemizedGrid')">+ Add item</button>
+          <div class="item-total" id="itemizedTotal"></div>
         </div>
       </div>
-      <div id="modeEqual">
-        <div class="lbl">Split between</div>
-        <div class="parts-row" id="participantsGrid"></div>
+      <hr class="div">
+      <div class="exp-list" id="expenseList"><div class="empty">No expenses yet.</div></div>
+      <div class="bottom-bar" id="totalBar" style="display:none">
+        <div class="total-line">Total <span id="totalAmt">€0.00</span></div>
+        <button class="btn btn-sm" onclick="openExport()">⬇ Export</button>
       </div>
-      <div id="modeCustom" style="display:none">
-        <div class="lbl">Amount each person owes</div>
-        <div class="csplit-grid" id="customAmtGrid"></div>
-        <div class="split-sum" id="customAmtSum"></div>
-      </div>
-      <div id="modePct" style="display:none">
-        <div class="lbl">Percentage each person owes</div>
-        <div class="csplit-grid" id="customPctGrid"></div>
-        <div class="split-sum" id="customPctSum"></div>
-      </div>
-      <div id="modeItemized" style="display:none">
-        <div class="lbl">Line items — click names to assign each item</div>
-        <div class="item-list" id="itemizedGrid"></div>
-        <button class="add-item-btn" onclick="addItemRow('itemizedGrid')">+ Add item</button>
-        <div class="item-total" id="itemizedTotal"></div>
-      </div>
-    </div>
-    <hr class="div">
-    <div class="exp-list" id="expenseList"><div class="empty">No expenses yet.</div></div>
-    <div class="bottom-bar" id="totalBar" style="display:none">
-      <div class="total-line">Total <span id="totalAmt">€0.00</span></div>
-      <button class="btn btn-sm" onclick="openExport()">⬇ Export</button>
     </div>
   </div>
 
-  <!-- 03 Results -->
-  <div class="card">
-    <div class="card-title">03 — Who Owes What &nbsp;<span style="font-size:.62rem;color:var(--muted);letter-spacing:1px;text-transform:none;font-weight:400">tap name to expand</span></div>
-    <div id="balances"><div class="empty">Add people and expenses to see results.</div></div>
-    <hr class="div" id="settleDivider" style="display:none">
-    <div id="settlements"></div>
-    <div class="bottom-bar" style="justify-content:flex-end">
-      <button class="btn btn-danger btn-sm no-print" onclick="openReset()">⚠ Reset All</button>
+  <!-- Panel: Owes -->
+  <div class="tab-panel" id="panelOwes">
+    <div class="card">
+      <!-- Sub-toggle -->
+      <div class="split-toggle" style="margin-bottom:1.1rem">
+        <button class="split-tab active" id="subOwes" onclick="switchOwesView('owes')">Who Owes What</button>
+        <button class="split-tab" id="subPaid" onclick="switchOwesView('paid')">Who Paid What</button>
+      </div>
+
+      <!-- Owes view -->
+      <div id="owesView">
+        <div id="balances"><div class="empty">Add people and expenses to see results.</div></div>
+        <hr class="div" id="settleDivider" style="display:none">
+        <div id="settlements"></div>
+      </div>
+
+      <!-- Paid view -->
+      <div id="paidView" style="display:none">
+        <div id="paidList"><div class="empty">Add people and expenses to see results.</div></div>
+      </div>
+
+      <div class="bottom-bar" style="justify-content:flex-end;margin-top:.9rem">
+        <button class="btn btn-sm" onclick="openExport()">⬇ Export</button>
+        <button class="btn btn-danger btn-sm no-print" onclick="openReset()">⚠ Reset All</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- Undo Toast -->
-<div class="toast" id="undoToast">
-  <span id="undoMsg">Expense deleted</span>
-  <button class="toast-undo" onclick="undoDelete()">Undo</button>
+<!-- Floating Undo/Redo Buttons -->
+<div class="undo-fab no-print" id="undoFab">
+  <button class="undo-fab-btn" id="undoBtn" onclick="undoLast()" title="Undo (Ctrl+Z)">
+    ↩ Undo <span class="undo-count" id="undoCount">0</span>
+  </button>
+  <div class="undo-fab-divider"></div>
+  <button class="undo-fab-btn" id="redoBtn" onclick="redoLast()" title="Redo (Ctrl+Shift+Z)">
+    ↪ Redo <span class="undo-count" id="redoCount">0</span>
+  </button>
 </div>
+
 <!-- Reset Undo Toast -->
 <div class="toast" id="resetUndoToast" style="bottom:5rem">
   <span>All data cleared</span>
@@ -267,7 +420,7 @@ select { cursor:pointer; }
     <div class="mlabel">Amount</div>
     <input type="number" id="editAmount" placeholder="0.00" min="0" step="0.01">
     <div class="mlabel">Paid by</div>
-    <select id="editPayer"></select>
+    <div class="parts-row" id="editPayerGrid"></div>
     <div class="mlabel">Split mode</div>
     <div class="split-toggle">
       <button class="split-tab active" id="eTabEqual" onclick="setEditMode('equal')">Equal</button>
@@ -302,23 +455,73 @@ select { cursor:pointer; }
   </div>
 </div>
 
+<!-- Trips Modal -->
+<div class="overlay" id="tripsModal" style="display:none" onclick="if(event.target===this)closeTrips()">
+  <div class="modal">
+    <h2>Trips</h2>
+    <div class="sub">// switch between sessions</div>
+    <button class="btn" style="width:100%;margin:1rem 0 .75rem" onclick="newTripPrompt()">+ New Trip</button>
+    <div class="trip-list" id="tripList"></div>
+    <div id="archivedSection" style="display:none">
+      <div style="font-size:.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:.5rem 0">Archived</div>
+      <div class="trip-list" id="archivedList"></div>
+    </div>
+    <button style="background:none;border:none;color:var(--muted);font-size:.75rem;font-family:'JetBrains Mono',monospace;cursor:pointer;padding:.3rem;margin-top:.2rem" id="showArchivedBtn" onclick="toggleArchivedTrips()">Show archived…</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:.8rem" onclick="closeTrips()">Close</button>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="overlay" id="profileModal" style="display:none" onclick="if(event.target===this)closeProfile()">
+  <div class="modal">
+    <h2>Profile</h2>
+    <div class="sub">// your preferences</div>
+    <div class="profile-avatar" id="profileAvatar">?</div>
+    <div class="mlabel">Your name</div>
+    <input type="text" id="profileName" placeholder="Enter your name…" maxlength="24">
+    <div class="mlabel" style="margin-top:.9rem">Default currency</div>
+    <div class="currency-grid" id="currencyGrid"></div>
+    <div class="mlabel" style="margin-top:.9rem">Custom symbol</div>
+    <input type="text" id="customCurrency" placeholder="e.g. kr, ₹, zł…" maxlength="4" style="max-width:120px">
+    <div class="mfooter" style="margin-top:1.2rem">
+      <button class="btn btn-ghost" onclick="closeProfile()">Cancel</button>
+      <button class="btn" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Export Modal -->
 <div class="overlay" id="exportModal" style="display:none" onclick="if(event.target===this)closeExport()">
   <div class="modal">
-    <h2>Export Report</h2>
-    <div class="sub">// choose your format</div>
-    <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.3rem">
-      <button onclick="exportPrint()" style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.95rem 1.1rem;cursor:pointer;text-align:left;color:var(--text);font-family:'Syne',sans-serif;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <span style="font-size:1.4rem">🖨️</span><div><div style="font-weight:700;font-size:.9rem">Print / Save as PDF</div><div style="font-size:.73rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.1rem">Opens print dialog</div></div>
+    <h2>Export / Import</h2>
+    <div class="sub">// share, save, or restore your session</div>
+
+    <div style="font-size:.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin:1.1rem 0 .55rem">Share</div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <button onclick="exportPrint()" class="xbtn" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span class="xico">🖨️</span><div><div class="xtitle">Print / Save as PDF</div><div class="xsub">Opens print dialog</div></div>
       </button>
-      <button onclick="exportCSV()" style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.95rem 1.1rem;cursor:pointer;text-align:left;color:var(--text);font-family:'Syne',sans-serif;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <span style="font-size:1.4rem">📊</span><div><div style="font-weight:700;font-size:.9rem">Export as CSV</div><div style="font-size:.73rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.1rem">Excel / Google Sheets</div></div>
+      <button onclick="exportCSV()" class="xbtn" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span class="xico">📊</span><div><div class="xtitle">Export as CSV</div><div class="xsub">Excel / Google Sheets</div></div>
       </button>
-      <button onclick="exportText()" style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.95rem 1.1rem;cursor:pointer;text-align:left;color:var(--text);font-family:'Syne',sans-serif;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-        <span style="font-size:1.4rem">📋</span><div><div style="font-weight:700;font-size:.9rem">Copy Summary Text</div><div style="font-size:.73rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.1rem">Paste into WhatsApp, notes…</div></div>
+      <button onclick="exportText()" class="xbtn" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span class="xico">📋</span><div><div class="xtitle">Copy Summary Text</div><div class="xsub">Paste into WhatsApp, notes…</div></div>
       </button>
     </div>
-    <button class="btn btn-ghost" style="width:100%" onclick="closeExport()">Cancel</button>
+
+    <div style="font-size:.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin:1.3rem 0 .55rem">Backup &amp; Restore</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <button onclick="exportJSON()" class="xbtn" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span class="xico">💾</span><div><div class="xtitle">Save JSON</div><div class="xsub">Download full backup</div></div>
+      </button>
+      <button onclick="triggerImportJSON()" class="xbtn" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span class="xico">📂</span><div><div class="xtitle">Load JSON</div><div class="xsub">Restore a session</div></div>
+      </button>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.5rem;padding:.5rem .7rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)">
+      💡 JSON saves everything — people, expenses, splits. Import can be undone with ↩ Undo.
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:1.1rem" onclick="closeExport()">Close</button>
   </div>
 </div>
 
@@ -338,44 +541,356 @@ select { cursor:pointer; }
   </div>
 </div>
 
+<!-- Startup Import Modal -->
+<div class="startup-overlay" id="startupModal" style="display:none">
+  <div class="startup-modal">
+    <div class="startup-logo">Split<span>Tab</span></div>
+    <div class="startup-sub">// no saved session found</div>
+    <div class="startup-drop" id="startupDrop" onclick="document.getElementById('startupFileInput').click()">
+      <div class="startup-drop-icon">💾</div>
+      <div class="startup-drop-title">Load a JSON backup</div>
+      <div class="startup-drop-hint">Click or drag & drop a split-tab-*.json file</div>
+    </div>
+    <div class="startup-divider">or</div>
+    <button class="btn" style="width:100%" onclick="dismissStartup()">✨ Start fresh</button>
+    <button class="startup-fresh" onclick="dismissStartup()">skip — I'll add people and expenses manually</button>
+  </div>
+  <input type="file" id="startupFileInput" accept=".json" style="display:none" onchange="startupImportJSON(event)">
+</div>
+
 <script>
 // ═══════════════ STATE ════════════════
 let friends = [];
 let expenses = [];
 let saveTimer = null;
-let undoStack = null;
-let undoTimer = null;
 let resetUndoStack = null;
 let resetUndoTimer = null;
 let editingId = null;
 let splitMode = 'equal';
 let editMode = 'equal';
-let itemRowId = 0; // unique id counter for item rows
+let itemRowId = 0;
+
+// ═══════════════ PROFILE ══════════════
+const CURRENCIES = ['€','$','£','¥','₹','Fr','kr','zł','₺','R$'];
+let profile = { name:'', currency:'€' };
+
+function loadProfile(){
+  try { const p=localStorage.getItem('st_profile'); if(p) profile=JSON.parse(p); } catch(e){}
+}
+function saveProfile(){
+  const name = document.getElementById('profileName').value.trim();
+  const custom = document.getElementById('customCurrency').value.trim();
+  profile.name = name;
+  profile.currency = custom || document.querySelector('.currency-btn.sel')?.dataset.cur || '€';
+  try { localStorage.setItem('st_profile', JSON.stringify(profile)); } catch(e){}
+  closeProfile();
+  updateProfileBtn();
+  renderExpenses(); recalculate();
+}
+function openProfile(){
+  document.getElementById('profileName').value = profile.name;
+  document.getElementById('customCurrency').value = CURRENCIES.includes(profile.currency) ? '' : profile.currency;
+  const grid = document.getElementById('currencyGrid');
+  grid.innerHTML = CURRENCIES.map(c=>`<button class="currency-btn${profile.currency===c?' sel':''}" data-cur="${c}" onclick="selectCurrency(this)">${c}</button>`).join('');
+  updateProfileAvatar(profile.name);
+  document.getElementById('profileModal').style.display='flex';
+}
+function closeProfile(){ document.getElementById('profileModal').style.display='none'; }
+function selectCurrency(btn){
+  document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('customCurrency').value='';
+}
+function updateProfileAvatar(name){
+  const el=document.getElementById('profileAvatar');
+  el.textContent = name ? name[0].toUpperCase() : '?';
+}
+function updateProfileBtn(){
+  const btn = document.getElementById('profileBtn');
+  btn.textContent = profile.name ? `👤 ${profile.name}` : '👤 Profile';
+}
+function getCurrency(){ return profile.currency || '€'; }
+
+// ═══════════════ TRIPS ════════════════
+let trips = [];      // [{id, name, emoji, friends, expenses, createdAt, archived}]
+let currentTripId = null;
+
+function newTrip(name, emoji='✈️'){
+  const id = Date.now().toString();
+  const autoFriends = profile.name ? [profile.name] : [];
+  const t = { id, name, emoji, friends:autoFriends, expenses:[], createdAt: new Date().toISOString(), archived:false };
+  trips.push(t);
+  return id;
+}
+function switchTrip(id){
+  if(id === currentTripId){ closeTrips(); return; }
+  saveTripState();
+  currentTripId = id;
+  loadTripState();
+  history = [];
+  redoStack = [];
+  updateUndoFab();
+  renderTripBar();
+  fullRender();
+  saveTrips();
+}
+function saveTripState(){
+  const t = trips.find(x=>String(x.id)===String(currentTripId));
+  if(t){ t.friends=[...friends]; t.expenses=JSON.parse(JSON.stringify(expenses)); }
+}
+function loadTripState(){
+  const t = trips.find(x=>String(x.id)===String(currentTripId));
+  if(t){ friends=[...t.friends]; expenses=JSON.parse(JSON.stringify(t.expenses)); }
+  else { friends=[]; expenses=[]; }
+}
+function archiveCurrentTrip(){
+  const t = trips.find(x=>x.id===currentTripId);
+  if(!t) return;
+  if(!confirm(`Archive "${t.name}"? You can unarchive it later from Trips.`)) return;
+  saveTripState();
+  t.archived = true;
+  // switch to first non-archived trip, or create a new one
+  const next = trips.find(x=>!x.archived && x.id!==currentTripId);
+  if(next){ currentTripId=next.id; }
+  else { currentTripId = newTrip('New Trip'); }
+  loadTripState();
+  history=[]; redoStack=[]; updateUndoFab();
+  renderTripBar(); fullRender(); saveTrips();
+}
+function unarchiveTrip(id, e){
+  e.stopPropagation();
+  const t = trips.find(x=>x.id===id);
+  if(t) t.archived=false;
+  saveTrips(); renderTripListModal();
+}
+function deleteTripFromList(id, e){
+  e.stopPropagation();
+  const t = trips.find(x=>x.id===id);
+  if(!t) return;
+  if(!confirm(`Delete trip "${t.name}" permanently?`)) return;
+  trips = trips.filter(x=>x.id!==id);
+  if(currentTripId===id){
+    const next = trips.find(x=>!x.archived);
+    if(next){ currentTripId=next.id; }
+    else { currentTripId=newTrip('New Trip'); }
+    loadTripState(); history=[]; redoStack=[]; updateUndoFab(); renderTripBar(); fullRender();
+  }
+  saveTrips(); renderTripListModal();
+}
+function newTripPrompt(){
+  const name = prompt('Trip name:','');
+  if(!name || !name.trim()) return;
+  saveTripState();
+  currentTripId = newTrip(name.trim());
+  loadTripState();
+  history=[]; redoStack=[]; updateUndoFab();
+  renderTripBar(); fullRender(); saveTrips(); closeTrips();
+}
+function renderTripBar(){
+  const t = trips.find(x=>String(x.id)===String(currentTripId));
+  const nameEl = document.getElementById('tripBarName');
+  const metaEl = document.getElementById('tripBarMeta');
+  if(!nameEl) return;
+  if(!t){
+    nameEl.textContent = trips.length ? trips[0].name : 'My Trip';
+    metaEl.textContent = '';
+    return;
+  }
+  nameEl.textContent = `${t.emoji} ${t.name}`;
+  metaEl.textContent = `${friends.length} people · ${expenses.length} expenses`;
+}
+let showingArchived = false;
+function openTrips(){
+  renderTripListModal();
+  document.getElementById('tripsModal').style.display='flex';
+}
+function closeTrips(){ document.getElementById('tripsModal').style.display='none'; }
+function toggleArchivedTrips(){
+  showingArchived = !showingArchived;
+  renderTripListModal();
+}
+function renderTripListModal(){
+  saveTripState();
+  const active = trips.filter(x=>!x.archived);
+  const archived = trips.filter(x=>x.archived);
+  const list = document.getElementById('tripList');
+  list.innerHTML = active.map(t=>{
+    const isCur = t.id===currentTripId;
+    const expCount = t.expenses.length;
+    const peopleCount = t.friends.length;
+    return `<div class="trip-item${isCur?' current':''}" onclick="switchTrip('${t.id}')">
+      <span class="trip-item-icon">${t.emoji}</span>
+      <div class="trip-item-info">
+        <div class="trip-item-name">${xa(t.name)}</div>
+        <div class="trip-item-meta">${peopleCount} people · ${expCount} expenses</div>
+      </div>
+      ${isCur?'<span class="trip-badge">Active</span>':''}
+      <button onclick="deleteTripFromList('${t.id}',event)" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;padding:3px 5px;transition:color .15s" title="Delete" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+    </div>`;
+  }).join('') || '<div style="font-size:.82rem;color:var(--muted);padding:.5rem;font-family:\'JetBrains Mono\',monospace">No active trips.</div>';
+
+  const archSec = document.getElementById('archivedSection');
+  const showBtn = document.getElementById('showArchivedBtn');
+  if(archived.length===0){ archSec.style.display='none'; showBtn.style.display='none'; return; }
+  showBtn.style.display='block';
+  showBtn.textContent = showingArchived ? 'Hide archived' : `Show archived (${archived.length})…`;
+  if(showingArchived){
+    archSec.style.display='block';
+    document.getElementById('archivedList').innerHTML = archived.map(t=>`
+      <div class="trip-item archived">
+        <span class="trip-item-icon">${t.emoji}</span>
+        <div class="trip-item-info">
+          <div class="trip-item-name">${xa(t.name)}</div>
+          <div class="trip-item-meta">${t.friends.length} people · ${t.expenses.length} expenses</div>
+        </div>
+        <span class="trip-badge arch">Archived</span>
+        <button onclick="unarchiveTrip('${t.id}',event)" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.75rem;font-family:'Syne',sans-serif;font-weight:700;padding:3px 6px;border:1px solid var(--border);border-radius:6px;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Restore</button>
+        <button onclick="deleteTripFromList('${t.id}',event)" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;padding:3px 5px;transition:color .15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+      </div>`).join('');
+  } else { archSec.style.display='none'; }
+}
+
+// ═══════════════ TRIPS STORAGE ════════
+function saveTrips(){
+  saveTripState();
+  try {
+    localStorage.setItem('st_trips', JSON.stringify(trips));
+    localStorage.setItem('st_current', currentTripId);
+    showSaved();
+  } catch(e){}
+}
+function loadTrips(){
+  try {
+    const t = localStorage.getItem('st_trips');
+    const c = localStorage.getItem('st_current');
+    if(t) trips = JSON.parse(t);
+    if(c) currentTripId = String(c);
+
+    // Migrate legacy data if no trips exist
+    if(!trips.length){
+      const lf = localStorage.getItem('st3_f');
+      const le = localStorage.getItem('st3_e');
+      const legacyFriends = lf ? JSON.parse(lf) : [];
+      const legacyExpenses = le ? JSON.parse(le) : [];
+      const id = String(Date.now());
+      trips.push({ id, name:'My Trip', emoji:'✈️', friends:legacyFriends, expenses:legacyExpenses, createdAt:new Date().toISOString(), archived:false });
+      currentTripId = id;
+    }
+
+    // Ensure currentTripId points to a real trip
+    if(!currentTripId || !trips.find(x=>String(x.id)===String(currentTripId))){
+      const first = trips.find(x=>!x.archived) || trips[0];
+      currentTripId = first ? String(first.id) : null;
+      if(!currentTripId){
+        const id = String(Date.now());
+        trips.push({ id, name:'My Trip', emoji:'✈️', friends:[], expenses:[], createdAt:new Date().toISOString(), archived:false });
+        currentTripId = id;
+      }
+    }
+
+    // Normalize all IDs to strings
+    trips = trips.map(x=>({...x, id:String(x.id)}));
+    currentTripId = String(currentTripId);
+
+    loadTripState();
+  } catch(e){
+    console.error('loadTrips error:', e);
+    const id = String(Date.now());
+    trips = [{ id, name:'My Trip', emoji:'✈️', friends:[], expenses:[], createdAt:new Date().toISOString(), archived:false }];
+    currentTripId = id;
+    friends = []; expenses = [];
+  }
+}
+
+// ═══════════════ UNDO / REDO ══════════
+const MAX_HISTORY = 30;
+let history = [];  // undo stack
+let redoStack = []; // redo stack
+
+function snapshot(label) {
+  history.push({ friends: [...friends], expenses: JSON.parse(JSON.stringify(expenses)), label });
+  if (history.length > MAX_HISTORY) history.shift();
+  redoStack = []; // any new action clears redo
+  updateUndoFab();
+}
+function updateUndoFab() {
+  const fab = document.getElementById('undoFab');
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const undoCnt = document.getElementById('undoCount');
+  const redoCnt = document.getElementById('redoCount');
+  if (!fab) return;
+  const hasUndo = history.length > 0;
+  const hasRedo = redoStack.length > 0;
+  fab.classList.toggle('visible', hasUndo || hasRedo);
+  undoBtn.disabled = !hasUndo;
+  redoBtn.disabled = !hasRedo;
+  undoCnt.textContent = history.length;
+  redoCnt.textContent = redoStack.length;
+  if (hasUndo) undoBtn.title = `Undo: ${history[history.length-1].label} (Ctrl+Z)`;
+  if (hasRedo) redoBtn.title = `Redo: ${redoStack[redoStack.length-1].label} (Ctrl+Shift+Z)`;
+}
+function undoLast() {
+  if (!history.length) return;
+  const cur = { friends: [...friends], expenses: JSON.parse(JSON.stringify(expenses)), label: history[history.length-1].label };
+  redoStack.push(cur);
+  const prev = history.pop();
+  friends = prev.friends;
+  expenses = prev.expenses;
+  fullRender(); scheduleSave();
+  updateUndoFab();
+}
+function redoLast() {
+  if (!redoStack.length) return;
+  const cur = { friends: [...friends], expenses: JSON.parse(JSON.stringify(expenses)), label: redoStack[redoStack.length-1].label };
+  history.push(cur);
+  const next = redoStack.pop();
+  friends = next.friends;
+  expenses = next.expenses;
+  fullRender(); scheduleSave();
+  updateUndoFab();
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    const modal = document.querySelector('.overlay[style*="flex"]');
+    if (modal) return;
+    e.preventDefault();
+    if (e.shiftKey) redoLast();
+    else undoLast();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+    const modal = document.querySelector('.overlay[style*="flex"]');
+    if (modal) return;
+    e.preventDefault();
+    redoLast();
+  }
+});
+
+// ═══════════════ TABS ═════════════════
+let activeTab = 'people';
+function switchTab(tab) {
+  activeTab = tab;
+  ['people','expenses','owes'].forEach(t => {
+    document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+  });
+}
 
 // ═══════════════ BOOT ═════════════════
 document.getElementById('friendInput').addEventListener('keydown', e => e.key==='Enter' && addFriend());
 document.getElementById('descInput').addEventListener('keydown', e => e.key==='Enter' && submitExpense());
 document.getElementById('amountInput').addEventListener('input', () => { if(splitMode!=='equal'&&splitMode!=='itemized') refreshCustomGrids('customAmtGrid','customAmtSum','customPctGrid','customPctSum'); });
-loadData();
+loadProfile();
+loadTrips();
+renderTripBar();
+updateProfileBtn();
+fullRender();
+updateUndoFab();
+checkStartupImport();
 
 // ═══════════════ STORAGE ══════════════
-function saveData() {
-  try {
-    localStorage.setItem('st3_f', JSON.stringify(friends));
-    localStorage.setItem('st3_e', JSON.stringify(expenses));
-    showSaved();
-  } catch(e){}
-}
-function loadData() {
-  try {
-    const f = localStorage.getItem('st3_f');
-    const e = localStorage.getItem('st3_e');
-    if(f) friends = JSON.parse(f);
-    if(e) expenses = JSON.parse(e);
-    if(friends.length || expenses.length){ fullRender(); showSaved(); }
-  } catch(e){}
-}
-function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveData, 500); }
+function saveData(){ scheduleSave(); }
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveTrips, 500); }
 function showSaved(){
   const b = document.getElementById('saveBadge');
   b.classList.add('saved');
@@ -388,11 +903,13 @@ function showSaved(){
 function addFriend(){
   const n = document.getElementById('friendInput').value.trim();
   if(!n || friends.includes(n)) return;
+  snapshot(`Add "${n}"`);
   friends.push(n);
   document.getElementById('friendInput').value = '';
   fullRender(); scheduleSave();
 }
 function removeFriend(n){
+  snapshot(`Remove "${n}"`);
   friends = friends.filter(f=>f!==n);
   expenses = expenses.filter(e=>e.payer!==n);
   fullRender(); scheduleSave();
@@ -405,9 +922,19 @@ function renderFriends(){
     btn.addEventListener('click', ()=>removeFriend(btn.dataset.name));
   });
 }
-function renderPayerSel(id, current=''){
-  document.getElementById(id).innerHTML = '<option value="">Who paid?</option>' +
-    friends.map(f=>`<option value="${xa(f)}" ${f===current?'selected':''}>${f}</option>`).join('');
+function renderPayerGrid(id, current=''){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = friends.map((f,i) => {
+    const uid = `${id}_${i}`;
+    const checked = (current ? f===current : i===0) ? 'checked' : '';
+    return `<input type="radio" class="part-check" name="${id}" id="${uid}" value="${xa(f)}" ${checked}>
+            <label class="part-label" for="${uid}">${xa(f)}</label>`;
+  }).join('');
+}
+function getPayerValue(id){
+  const el = document.querySelector(`input[name="${id}"]:checked`);
+  return el ? el.value : '';
 }
 
 // ═══════════════ SPLIT MODE ════════════
@@ -480,7 +1007,7 @@ function updateItemizedTotal(gridId, totalId){
     const price = parseFloat(row.querySelectorAll('input')[1]?.value)||0;
     sum+=price;
   });
-  el.textContent = `Items total: €${sum.toFixed(2)}`;
+  el.textContent = `Items total: ${getCurrency()}${sum.toFixed(2)}`;
 }
 
 function getItemizedSplits(gridId){
@@ -544,7 +1071,7 @@ function buildGrid(gridId, sumId, type, totalAmt, people){
       <input type="number" id="${gridId}_${i}" min="0" step="${type==='pct'?'0.1':'0.01'}"
         value="${share>0?share.toFixed(type==='pct'?1:2):''}" placeholder="0"
         oninput="calcSum(${q(gridId)},${q(sumId)},${q(type)},${totalAmt})">
-      <span class="unit">${type==='pct'?'%':`/€${totalAmt.toFixed(2)}`}</span>
+      <span class="unit">${type==='pct'?'%':`/${getCurrency()}${totalAmt.toFixed(2)}`}</span>
     </div>`).join('');
   calcSum(gridId, sumId, type, totalAmt);
 }
@@ -560,7 +1087,7 @@ function calcSum(gridId, sumId, type, total){
     el.className = 'split-sum '+(ok?'ok':'bad');
   } else {
     const ok = Math.abs(sum-total)<0.02;
-    el.textContent = `Sum: €${sum.toFixed(2)} / €${total.toFixed(2)} ${ok?'✓':''}`;
+    el.textContent = `Sum: ${getCurrency()}${sum.toFixed(2)} / ${getCurrency()}${total.toFixed(2)} ${ok?'✓':''}`;
     el.className = 'split-sum '+(ok?'ok':'bad');
   }
 }
@@ -596,7 +1123,7 @@ function getEqualParts(gridId){
 // ═══════════════ ADD EXPENSE ══════════
 function submitExpense(){
   const desc = document.getElementById('descInput').value.trim();
-  const payer = document.getElementById('payerSelect').value;
+  const payer = getPayerValue('payerGrid');
   if(!desc){ document.getElementById('descInput').focus(); return; }
   if(!payer){ alert('Select who paid.'); return; }
 
@@ -616,11 +1143,12 @@ function submitExpense(){
       const gId = splitMode==='custom'?'customAmtGrid':'customPctGrid';
       const type = splitMode==='custom'?'amt':'pct';
       splits = getCustomSplits(gId, type, amount, friends);
-      if(!splits){ alert(splitMode==='custom'?`Custom amounts must add up to €${amount.toFixed(2)}.`:'Percentages must add up to 100%.'); return; }
+      if(!splits){ alert(splitMode==='custom'?`Custom amounts must add up to ${getCurrency()}${amount.toFixed(2)}.`:'Percentages must add up to 100%.'); return; }
       participants = Object.keys(splits);
     }
   }
 
+  snapshot(`Add expense "${desc}"`);
   expenses.push({ id:Date.now(), desc, amount, payer, participants, splits, modeType:splitMode, items });
   document.getElementById('descInput').value='';
   document.getElementById('amountInput').value='';
@@ -639,7 +1167,7 @@ function openEdit(id){
   editingId = id;
   document.getElementById('editDesc').value = e.desc;
   document.getElementById('editAmount').value = e.amount;
-  renderPayerSel('editPayer', e.payer);
+  renderPayerGrid('editPayerGrid', e.payer);
   renderParts('editPartsGrid', e.participants);
   const mode = e.modeType || (e.splits ? 'custom' : 'equal');
   editMode = mode;
@@ -677,7 +1205,7 @@ function restoreCustom(e){
 function closeEdit(){ document.getElementById('editModal').style.display='none'; editingId=null; }
 function saveEdit(){
   const desc = document.getElementById('editDesc').value.trim();
-  const payer = document.getElementById('editPayer').value;
+  const payer = getPayerValue('editPayerGrid');
   if(!desc||!payer){ alert('Please fill all fields.'); return; }
 
   let splits=null, participants=[], amount=0, items=null;
@@ -696,34 +1224,25 @@ function saveEdit(){
       const gId = editMode==='custom'?'editCustomAmtGrid':'editCustomPctGrid';
       const type = editMode==='custom'?'amt':'pct';
       splits = getCustomSplits(gId, type, amount, friends);
-      if(!splits){ alert(editMode==='custom'?`Amounts must add up to €${amount.toFixed(2)}.`:'Percentages must add up to 100%.'); return; }
+      if(!splits){ alert(editMode==='custom'?`Amounts must add up to ${getCurrency()}${amount.toFixed(2)}.`:'Percentages must add up to 100%.'); return; }
       participants = Object.keys(splits);
     }
   }
   const idx = expenses.findIndex(x=>x.id===editingId);
-  if(idx!==-1) expenses[idx] = {...expenses[idx], desc, amount, payer, participants, splits, modeType:editMode, items};
+  if(idx!==-1){
+    snapshot(`Edit expense "${expenses[idx].desc}"`);
+    expenses[idx] = {...expenses[idx], desc, amount, payer, participants, splits, modeType:editMode, items};
+  }
   closeEdit();
   renderExpenses(); recalculate(); scheduleSave();
 }
 
-// ═══════════════ DELETE + UNDO ════════
+// ═══════════════ DELETE ═══════════════
 function deleteExpense(id){
   const idx = expenses.findIndex(e=>e.id===id);
   if(idx===-1) return;
-  const removed = expenses.splice(idx,1)[0];
-  undoStack = { expense:removed, index:idx };
-  renderExpenses(); recalculate(); scheduleSave();
-  clearTimeout(undoTimer);
-  document.getElementById('undoMsg').textContent = `"${removed.desc}" deleted`;
-  document.getElementById('undoToast').classList.add('show');
-  undoTimer = setTimeout(()=>{ document.getElementById('undoToast').classList.remove('show'); undoStack=null; }, 5000);
-}
-function undoDelete(){
-  if(!undoStack) return;
-  expenses.splice(undoStack.index,0,undoStack.expense);
-  undoStack=null;
-  clearTimeout(undoTimer);
-  document.getElementById('undoToast').classList.remove('show');
+  snapshot(`Delete "${expenses[idx].desc}"`);
+  expenses.splice(idx,1);
   renderExpenses(); recalculate(); scheduleSave();
 }
 
@@ -749,7 +1268,7 @@ function renderExpenses(){
       </div>
     </div>`;
   }).join('');
-  document.getElementById('totalAmt').textContent = '€'+total.toFixed(2);
+  document.getElementById('totalAmt').textContent = getCurrency()+total.toFixed(2);
   bar.style.display='flex';
 }
 
@@ -782,14 +1301,14 @@ function recalculate(){
 
   balDiv.innerHTML = friends.map(f=>{
     const v=bal[f], cls=v>0.005?'pos':v<-0.005?'neg':'zero';
-    const label=v>0.005?`gets back €${v.toFixed(2)}`:v<-0.005?`owes €${Math.abs(v).toFixed(2)}`:'settled ✓';
+    const label=v>0.005?`gets back ${getCurrency()}${v.toFixed(2)}`:v<-0.005?`owes ${getCurrency()}${Math.abs(v).toFixed(2)}`:'settled ✓';
     const rows = items[f].map(it=>`
       <div class="bd-item">
         <div class="bd-left">
           <div class="bd-desc">${it.desc}</div>
           <div class="bd-sub">${it.payer?'you paid — your share deducted':`paid by ${it.paidBy}`}</div>
         </div>
-        <div class="bd-amt ${it.payer?'pos':'neg'}">${it.payer?`+€${(it.share).toFixed(2)}`:`-€${it.share.toFixed(2)}`}</div>
+        <div class="bd-amt ${it.payer?'pos':'neg'}">${it.payer?`+${getCurrency()}${(it.share).toFixed(2)}`:`-${getCurrency()}${it.share.toFixed(2)}`}</div>
       </div>`).join('') || '<div style="font-size:.8rem;color:var(--muted);padding:.3rem 0">Not in any expense</div>';
     return `<div class="balance-block">
       <div class="balance-row" onclick="toggleBD('bd_${xa(f)}','br_${xa(f)}')" id="br_${xa(f)}">
@@ -812,11 +1331,12 @@ function recalculate(){
   }
   if(settlements.length){
     settlDiv.innerHTML = `<div style="font-size:.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.55rem">Settlements</div>`+
-      settlements.map(s=>`<div class="sett-item"><span>${s.from}</span><span class="arr">→</span><span>${s.to}</span><strong>€${s.amt.toFixed(2)}</strong></div>`).join('');
+      settlements.map(s=>`<div class="sett-item"><span>${s.from}</span><span class="arr">→</span><span>${s.to}</span><strong>${getCurrency()}${s.amt.toFixed(2)}</strong></div>`).join('');
     sDiv.style.display='block';
   } else { settlDiv.innerHTML=''; sDiv.style.display='none'; }
 
   window._lastBal=bal; window._lastSettlements=settlements;
+  renderPaidWhat();
 }
 
 function toggleBD(bdId, brId){
@@ -826,19 +1346,121 @@ function toggleBD(bdId, brId){
   br?.classList.toggle('open',on);
 }
 
+// ═══════════════ OWES VIEW TOGGLE ═════
+let owesView = 'owes';
+function switchOwesView(view){
+  owesView = view;
+  document.getElementById('subOwes').classList.toggle('active', view==='owes');
+  document.getElementById('subPaid').classList.toggle('active', view==='paid');
+  document.getElementById('owesView').style.display = view==='owes' ? 'block' : 'none';
+  document.getElementById('paidView').style.display  = view==='paid' ? 'block' : 'none';
+  if(view==='paid') renderPaidWhat();
+}
+
+function getOwnShare(e, person){
+  const amt = Number(e.amount) || 0;
+  if(e.splits && e.splits[person] !== undefined) return Number(e.splits[person]);
+  const parts = e.participants || [];
+  if(parts.includes(person)) return amt / parts.length;
+  return 0;
+}
+
+function renderPaidWhat(){
+  const el = document.getElementById('paidList');
+  if(!el) return;
+
+  if(!expenses || !expenses.length){
+    el.innerHTML = '<div class="empty">No expenses yet.</div>';
+    return;
+  }
+
+  const paid = {};
+  expenses.forEach(e => {
+    const payer = e.payer || e.paid_by || '';
+    if(!payer) return;
+    if(!paid[payer]) paid[payer] = { total:0, ownShare:0, exps:[] };
+    paid[payer].total += Number(e.amount) || 0;
+    paid[payer].ownShare += getOwnShare(e, payer);
+    paid[payer].exps.push(e);
+  });
+
+  const allPayers = Object.keys(paid).sort((a,b) => paid[b].total - paid[a].total);
+
+  if(!allPayers.length){
+    el.innerHTML = '<div class="empty">No payer data found in expenses.</div>';
+    return;
+  }
+
+  el.innerHTML = allPayers.map(f => {
+    const p = paid[f];
+    const rows = p.exps.map(e => {
+      const amt = Number(e.amount);
+      const own = getOwnShare(e, f);
+      const advanced = amt - own;
+      const parts = e.participants || Object.keys(e.splits || {});
+      const splitLabel = e.modeType==='itemized' ? 'itemized'
+        : e.splits ? 'custom split'
+        : `equal · ${parts.length} ${parts.length===1?'person':'people'}`;
+      return `<div class="bd-item" style="display:grid;grid-template-columns:1fr auto auto;gap:.4rem .8rem;align-items:baseline">
+        <div style="grid-column:1/2">
+          <div class="bd-desc">${xa(e.desc||'Untitled')}</div>
+          <div class="bd-sub">${splitLabel}</div>
+        </div>
+        <div style="grid-column:2/3;text-align:right">
+          <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">paid</div>
+          <div class="bd-amt pos">+${getCurrency()}${amt.toFixed(2)}</div>
+        </div>
+        <div style="grid-column:3/4;text-align:right">
+          <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">own share</div>
+          <div class="bd-amt neg">-${getCurrency()}${own.toFixed(2)}</div>
+        </div>
+        ${advanced > 0.005 ? `<div style="grid-column:1/-1;font-size:.66rem;font-family:'JetBrains Mono',monospace;color:var(--muted);border-top:1px solid var(--border);padding-top:.25rem;margin-top:.1rem">fronted ${getCurrency()}${advanced.toFixed(2)} for others</div>` : ''}
+      </div>`;
+    }).join('');
+
+    const netAdvanced = p.total - p.ownShare;
+    const label = `paid ${getCurrency()}${p.total.toFixed(2)} · ${p.exps.length} expense${p.exps.length>1?'s':''}`;
+
+    const summary = `<div style="display:flex;gap:0;margin-top:.6rem;background:var(--surface);border-radius:9px;border:1px solid var(--border2);overflow:hidden">
+      <div style="text-align:center;flex:1;padding:.5rem .3rem">
+        <div style="font-size:.58rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.8px;text-transform:uppercase;margin-bottom:.18rem">Total paid</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);font-size:.88rem">+${getCurrency()}${p.total.toFixed(2)}</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center;flex:1;padding:.5rem .3rem">
+        <div style="font-size:.58rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.8px;text-transform:uppercase;margin-bottom:.18rem">Own share</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);font-size:.88rem">-${getCurrency()}${p.ownShare.toFixed(2)}</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center;flex:1;padding:.5rem .3rem">
+        <div style="font-size:.58rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.8px;text-transform:uppercase;margin-bottom:.18rem">Net fronted</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.88rem;color:${netAdvanced>0.005?'var(--accent)':'var(--muted)'}">${netAdvanced>0.005?'+':''}${getCurrency()}${netAdvanced.toFixed(2)}</div>
+      </div>
+    </div>`;
+
+    return `<div class="balance-block">
+      <div class="balance-row" onclick="toggleBD('pd_${xa(f)}','pr_${xa(f)}')" id="pr_${xa(f)}">
+        <span class="balance-name"><span class="caret">▶</span>${xa(f)}</span>
+        <span class="balance-amt pos">${label}</span>
+      </div>
+      <div class="breakdown" id="pd_${xa(f)}">${rows}${summary}</div>
+    </div>`;
+  }).join('');
+}
+
 // ═══════════════ FULL RENDER ══════════
 function fullRender(){
   renderFriends();
-  renderPayerSel('payerSelect');
+  renderPayerGrid('payerGrid');
   renderParts('participantsGrid');
   if(splitMode==='equal' || splitMode==='itemized'){
-    // rebuild itemized grid people if in that mode
     if(splitMode==='itemized') updateItemizedGridPeople('itemizedGrid','itemizedTotal');
   } else {
     refreshCustomGrids('customAmtGrid','customAmtSum','customPctGrid','customPctSum');
   }
   renderExpenses();
   recalculate();
+  renderTripBar();
 }
 
 function updateItemizedGridPeople(gridId, totalId){
@@ -878,23 +1500,118 @@ function exportText(){
   let txt=`=== Split Tab Report ===\nDate: ${new Date().toLocaleDateString()}\nTotal: €${total.toFixed(2)}\n\n── Expenses ──\n`;
   expenses.forEach(e=>txt+=`• ${e.desc}: €${e.amount.toFixed(2)} (paid by ${e.payer}, ${e.splits?'custom split':'equal split'})\n`);
   txt+='\n── Balances ──\n';
-  friends.forEach(f=>{ const v=bal[f]||0; txt+=v>0.005?`• ${f}: gets back €${v.toFixed(2)}\n`:v<-0.005?`• ${f}: owes €${Math.abs(v).toFixed(2)}\n`:`• ${f}: settled ✓\n`; });
+  friends.forEach(f=>{ const v=bal[f]||0; txt+=v>0.005?`• ${f}: gets back ${getCurrency()}${v.toFixed(2)}\n`:v<-0.005?`• ${f}: owes ${getCurrency()}${Math.abs(v).toFixed(2)}\n`:`• ${f}: settled ✓\n`; });
   txt+='\n── Who Pays Who ──\n';
   (window._lastSettlements||[]).forEach(s=>txt+=`• ${s.from} → ${s.to}: €${s.amt.toFixed(2)}\n`);
   navigator.clipboard.writeText(txt).then(()=>alert('✓ Copied!')).catch(()=>prompt('Copy this:',txt));
 }
 
-// ═══════════════ RESET ════════════════
+function exportJSON(){
+  closeExport();
+  const t = trips.find(x=>x.id===currentTripId);
+  const data = { version:2, exportedAt: new Date().toISOString(), tripName: t?.name||'Trip', currency: getCurrency(), friends, expenses };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `split-tab-${(t?.name||'trip').replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+function triggerImportJSON(){
+  document.getElementById('importFileInput').value='';
+  document.getElementById('importFileInput').click();
+}
+function importJSON(event){
+  closeExport();
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!Array.isArray(data.friends) || !Array.isArray(data.expenses)){
+        alert('Invalid file — does not look like a Split Tab JSON backup.'); return;
+      }
+      snapshot('Before import');
+      friends = data.friends;
+      expenses = data.expenses;
+      const t = trips.find(x=>String(x.id)===String(currentTripId));
+      if(t && data.tripName) t.name = data.tripName;
+      if(t && data.currency) profile.currency = data.currency;
+      fullRender(); renderPaidWhat(); scheduleSave();
+    } catch(err) {
+      alert('Could not read file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════ STARTUP IMPORT ══════════════
+function checkStartupImport(){
+  // Show startup modal only if localStorage has no trip data at all
+  const hasTrips = localStorage.getItem('st_trips');
+  const hasFriends = localStorage.getItem('st3_f');
+  if(!hasTrips && !hasFriends){
+    const modal = document.getElementById('startupModal');
+    modal.style.display = 'flex';
+    setupStartupDrop();
+  }
+}
+
+function dismissStartup(){
+  document.getElementById('startupModal').style.display = 'none';
+}
+
+function startupImportJSON(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!Array.isArray(data.friends) || !Array.isArray(data.expenses)){
+        alert('Invalid file — does not look like a Split Tab JSON backup.'); return;
+      }
+      dismissStartup();
+      friends = data.friends;
+      expenses = data.expenses;
+      // If the JSON has a trip name, rename current trip
+      const t = trips.find(x=>String(x.id)===String(currentTripId));
+      if(t && data.tripName) t.name = data.tripName;
+      if(t && data.currency) profile.currency = data.currency;
+      fullRender(); renderPaidWhat(); scheduleSave();
+    } catch(err) {
+      alert('Could not read file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function setupStartupDrop(){
+  const drop = document.getElementById('startupDrop');
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e=>{
+    e.preventDefault(); drop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if(!file) return;
+    const fakeEvt = { target: { files: [file] } };
+    startupImportJSON(fakeEvt);
+  });
+}
+
+
 function openReset(){ document.getElementById('resetModal').style.display='flex'; }
 function closeReset(){ document.getElementById('resetModal').style.display='none'; }
 function confirmReset(){
   closeReset();
   resetUndoStack = { friends:[...friends], expenses:JSON.parse(JSON.stringify(expenses)) };
   friends=[]; expenses=[];
-  localStorage.removeItem('st3_f'); localStorage.removeItem('st3_e');
+  history=[];
+  redoStack=[];
+  updateUndoFab();
   document.getElementById('saveBadge').classList.remove('saved');
   document.getElementById('saveText').textContent='no data saved';
-  fullRender();
+  fullRender(); saveTrips();
   clearTimeout(resetUndoTimer);
   document.getElementById('resetUndoToast').classList.add('show');
   resetUndoTimer = setTimeout(()=>{ document.getElementById('resetUndoToast').classList.remove('show'); resetUndoStack=null; }, 7000);
