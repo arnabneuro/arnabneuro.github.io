@@ -153,6 +153,10 @@
     .oss-link:hover { border-color: var(--accent); }
     .oss-link.secondary { color: var(--muted); border-color: rgba(107,114,128,0.3); }
     .oss-link.secondary:hover { color: var(--accent2); border-color: var(--accent2); }
+    .oss-preview { display: block; position: relative; width: 100%; aspect-ratio: 16/9; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; background: #0d1015; }
+    .oss-preview iframe { position: absolute; top: 0; left: 0; width: 250%; height: 250%; transform: scale(0.4); transform-origin: top left; border: none; pointer-events: none; }
+    .oss-preview::after { content: 'Live preview ↗'; position: absolute; bottom: 0; right: 0; padding: 0.25rem 0.6rem; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: rgba(11,14,18,0.85); border-top-left-radius: 2px; }
+    .oss-card:hover .oss-preview { border-color: var(--accent); }
 
     @media(max-width:768px){
       nav { padding:1.2rem 1.5rem; } .nav-links { display:none; }
@@ -234,7 +238,7 @@
         <p>
           My PhD at IISc Bangalore focused on how early-life stress shapes
           hippocampal glial development and adult behaviour. I also build
-          open-source software tools (DBscorer, tracKit) that make
+          open-source software tools (DBscorer, TraceNote) that make
           behavioural neuroscience analysis faster and more reproducible.
         </p>
       </div>
@@ -277,7 +281,7 @@
           <div class="tl-subtitle">Early-Life Stress & Glial Development</div>
           <div class="tl-org">Marathe Lab · Centre for Neuroscience, Indian Institute of Science, Bangalore, India</div>
           <div class="tl-desc">
-            Investigated effects of early-life maternal deprivation on hippocampal astroglial morphology and adult behaviour. Developed open-source tools (DBscorer, tracKit) for automated rodent behavioural analysis, now used by labs worldwide.
+            Investigated effects of early-life maternal deprivation on hippocampal astroglial morphology and adult behaviour. Developed open-source tools (DBscorer, TraceNote) for automated rodent behavioural analysis, now used by labs worldwide.
           </div>
         </div>
       </div>
@@ -307,21 +311,13 @@
       <div class="pub-item reveal">
         <div class="pub-num">01</div>
         <div>
-          <div class="pub-title">tracKit: an open-source video tracking software for analysis of rodent behavior</div>
-          <div class="pub-authors">Nandi, A., Virmani, G., &amp; Marathe, S. (2023)</div>
-          <div class="pub-journal">Manuscript under preparation <span class="pub-badge prep">In Prep</span></div>
-        </div>
-      </div>
-      <div class="pub-item reveal">
-        <div class="pub-num">02</div>
-        <div>
           <div class="pub-title">SRF-deficient astrocytes provide neuroprotection in mouse models of excitotoxicity and neurodegeneration</div>
           <div class="pub-authors">Thumu SCR., Jain M., Soman S., Das S., Verma V., Nandi A., et al. (2023)</div>
           <div class="pub-journal">bioRxiv <span class="pub-badge">Preprint</span></div>
         </div>
       </div>
       <div class="pub-item reveal">
-        <div class="pub-num">03</div>
+        <div class="pub-num">02</div>
         <div>
           <div class="pub-title">DBscorer: An open-source software for automated accurate analysis of rodent behavior in forced swim test and tail suspension test</div>
           <div class="pub-authors">Nandi, A., Virmani, G., Barve, A., &amp; Marathe, S. (2021)</div>
@@ -329,7 +325,7 @@
         </div>
       </div>
       <div class="pub-item reveal">
-        <div class="pub-num">04</div>
+        <div class="pub-num">03</div>
         <div>
           <div class="pub-title">Subfield-specific effects of chronic mild unpredictable stress on hippocampal astrocytes</div>
           <div class="pub-authors">Virmani, G., D'almeida, P., Nandi, A., &amp; Marathe, S. (2021)</div>
@@ -422,19 +418,23 @@
       </div>
 
       <div class="oss-card reveal" data-oss>
-        <div class="oss-icon">◎</div>
-        <div class="oss-name">tracKit</div>
+        <div class="oss-icon">◈</div>
+        <div class="oss-name">TraceNote</div>
+        <a href="https://arnabneuro.github.io/TraceNotev1.html" target="_blank" class="oss-preview" aria-label="Open TraceNote live preview">
+          <iframe src="https://arnabneuro.github.io/TraceNotev1.html" loading="lazy" tabindex="-1"></iframe>
+        </a>
         <div class="oss-desc">
-          Open-source video tracking software for rodent behavioural analysis. Supports multiple arenas and assays, providing fast and reproducible trajectory extraction without expensive commercial alternatives.
+          A free, intuitive, browser-based video tracking and behaviour-scoring suite — no installation or license required. Load a video to use for single animal tracking, ROI-based zone analysis, manual and automatic immobility scoring (with ROC/logistic-regression threshold optimization) like DBscorer, point and range annotation with custom hotkeys, and exportable trajectory/heatmap plots — all in the browser.
         </div>
         <div class="oss-tags">
-          <span class="oss-tag">MATLAB</span>
+          <span class="oss-tag">JavaScript</span>
           <span class="oss-tag">Video Tracking</span>
-          <span class="oss-tag">Locomotion</span>
+          <span class="oss-tag">Behaviour Scoring</span>
           <span class="oss-tag">Open Source</span>
         </div>
         <div class="oss-links">
-          <a href="https://github.com/arnabneuro/tracKit" target="_blank" class="oss-link">GitHub ↗</a>
+          <a href="https://arnabneuro.github.io/TraceNotev1.html" target="_blank" class="oss-link">Try it ↗</a>
+          <a href="https://github.com/arnabneuro/arnabneuro.github.io/blob/main/TraceNotev1.html" target="_blank" class="oss-link secondary">GitHub ↗</a>
         </div>
       </div>
   </div>
@@ -488,6 +488,7 @@
 <footer>
   <p>© 2026 Arnab Nandi</p>
   <p>arnabneuro.github.io · NeuroPSI, CNRS · Paris-Saclay</p>
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=arnabneuro.github.io.index" alt="Page views" style="opacity:0.75; height:20px;" />
 </footer>
 
 <script>
